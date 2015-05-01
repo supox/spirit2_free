@@ -20,6 +20,12 @@ include $(BUILD_EXECUTABLE)
     # 5 Tuner Plugins:
 
 include $(CLEAR_VARS)
+LOCAL_SRC_FILES:= tnr/tnr_bonovo.c
+LOCAL_MODULE:= libs2t_bonovo
+LOCAL_LDLIBS := -llog
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= tnr/tnr_ssl.c
 LOCAL_MODULE:= libs2t_ssl
 LOCAL_LDLIBS := -llog
