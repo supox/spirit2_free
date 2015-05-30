@@ -114,7 +114,7 @@ android:windowSoftInputMode="stateHidden"
  -->
         <activity
             android:name="fm.a2d.sf.gui_act"
-    android:launchMode="singleInstance"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -166,13 +166,13 @@ android:theme="@android:style/Theme.Translucent.NoTitleBar"
  -->
     <service
       android:name="fm.a2d.sf.svc_svc"
-android:process=":s"
+      android:process=":s"
       android:label="SpiritF FM Service"
       android:enabled="true"
       android:exported="true"
       >
       <intent-filter>
-                <action android:name="fm.a2d.sf.action.set" />
+        <action android:name="fm.a2d.sf.action.set" />
       </intent-filter>
     </service>
 <!-- 

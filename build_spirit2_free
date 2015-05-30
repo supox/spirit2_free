@@ -6,13 +6,8 @@ export WS="/home/supox/Desktop/nu3001/source_code"
 export PROJ="spirit2_free"
 cd $WS/$PROJ
 
-rm -rf obj  # obj/local/armeabi/*
-/opt/adt-bundle-linux-x86_64-20140321/sdk/tools/android update project --target android-21 --path . --name $PROJ
-
-#mkdir -p res/raw
-#cp ../raw/spirit_sh ../$PROJ/res/raw/
-#cp ../raw/b1_bin    ../$PROJ/res/raw/
-#cp ../raw/b2_bin    ../$PROJ/res/raw/
+# rm -rf obj  # obj/local/armeabi/*
+# /opt/adt-bundle-linux-x86_64-20140321/sdk/tools/android update project --target android-21 --path . --name $PROJ
 
 # echo ndk-build start
 # rm -rf libs # libs/armeabi/
