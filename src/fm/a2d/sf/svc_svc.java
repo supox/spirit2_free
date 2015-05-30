@@ -178,12 +178,25 @@ public class svc_svc extends Service implements svc_tcb, svc_acb {  // Service c
   }
 
 
+  private PendingIntent createAction(String key, String val) {
+    Intent resultIntent = new Intent(this, svc_svc.class);
+    resultIntent.putExtra(key, val);
+    PendingIntent pIntent = PendingIntent.getService(
+        this,
+        0,
+        resultIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+        );
+    return pIntent;
+  }
+
   private void foreground_start () {
     //if (service_update_remote || service_update_notification) // Stops media buttons ?
 
     com_uti.logd ("Calling startForeground");
+
     Intent resultIntent = new Intent(this, gui_act.class);
-    PendingIntent resultPendingIntent = PendingIntent.getActivity(
+    PendingIntent pIntent = PendingIntent.getActivity(
         this,
         0,
         resultIntent,
@@ -194,7 +207,10 @@ public class svc_svc extends Service implements svc_tcb, svc_acb {  // Service c
       .setContentTitle("Spirit 2")
       .setContentText("Tap to open")
       .setSmallIcon(R.drawable.img_icon)
-      .setContentIntent(resultPendingIntent)
+      .setContentIntent(pIntent)
+      .addAction(R.drawable.btn_rw, "", com_api.pend_intent_get(this, "service_seek_state", "Down"))
+      .addAction(R.drawable.btn_play, "", com_api.pend_intent_get(this, "tuner_state", "Toggle"))
+      .addAction(R.drawable.btn_ff, "", com_api.pend_intent_get(this, "service_seek_state", "Up"))
       .build ();
     startForeground (com_uti.s2_notif_id, notification);
   }
@@ -355,21 +371,10 @@ public class svc_svc extends Service implements svc_tcb, svc_acb {  // Service c
         //com_uti.loge ("preset_num: " + preset_num);
         //com_uti.loge ("preset_curr: " + preset_curr);
         if (val.equals ("Down")) {
-          if (preset_num <= 1) {
-            m_svc_tap.tuner_set ("tuner_seek_state", val);
-          }
-          else
-            preset_next (false);
+          preset_next (false);
         }
         else if (val.equals ("Up")) {
-          if (preset_num <= 1)
-            m_svc_tap.tuner_set ("tuner_seek_state", val);
-          else
-            preset_next (true);
-        }
-        else if (val.equals ("")) {
-        }
-        else {
+          preset_next (true);
         }
 
         // Tuner:
@@ -653,16 +658,33 @@ public class svc_svc extends Service implements svc_tcb, svc_acb {  // Service c
   }
 
   private void preset_next (boolean up) {                               // Tune to next preset, up (true) or down
-    com_uti.logd ("start preset_curr: " + preset_curr + "  preset_num: " + preset_num);
-    if (preset_num <= 0)                                                // If no presets, done
-      return;
-    preset_curr_fix ();                                                 // First fix any problems
-    preset_curr_set (m_com_api.tuner_freq);                             // Set preset_curr to a valid preset index for passed frequency by searching preset list
-    if (up)
-      preset_curr ++;
-    else
-      preset_curr --;
-    preset_go (preset_curr);
+    // Find current freq
+    String freq = m_com_api.tuner_freq;
+    int presetIndex = 0;
+    for (int index = 0; index < com_api.chass_preset_max; index++) {
+      String presetFreq = com_uti.prefs_get (this, "chass_preset_freq_" + index, "");
+      if (freq.equals (presetFreq)) {
+        presetIndex = index;
+        break;
+      }
+    }
+
+    // Update
+    for (int index = 0; index < com_api.chass_preset_max; index++) {
+      if (up) {
+        presetIndex++;
+      } else {
+        presetIndex--;
+      }
+      presetIndex = presetIndex % com_api.chass_preset_max;
+      if(presetIndex < 0) presetIndex += com_api.chass_preset_max; 
+
+      String presetFreq = com_uti.prefs_get (this, "chass_preset_freq_" + presetIndex, "");
+      if (! presetFreq.equals ("")) {
+        tuner_freq_set (presetFreq);
+        return;
+      }
+    }
   }
 
 
