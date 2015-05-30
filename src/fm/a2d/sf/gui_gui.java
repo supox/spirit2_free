@@ -1667,20 +1667,26 @@ int f_freq_hi = 399999;
 
     // Presets:
 
+  private void save_preset(int idx, String name, String freq) {
+    m_com_api.key_set ("chass_preset_name_" + idx, name, "chass_preset_freq_" + idx, freq);
+    com_uti.prefs_set(m_context, "chass_preset_name_" + idx, name);
+    com_uti.prefs_set(m_context, "chass_preset_freq_" + idx, freq);
+  }
+
   private void preset_delete (int idx) {
     com_uti.logd ("idx: " + idx);
     m_preset_tv [idx].setText ("");
     m_preset_freq [idx] = "";
     m_preset_name [idx] = "";
     m_preset_ib [idx].setImageResource (R.drawable.btn_preset);
-    m_com_api.key_set ("chass_preset_name_" + idx, "delete", "chass_preset_freq_" + idx, "delete");   // !! Current implementation requires simultaneous
+    save_preset(idx, "", "delete");
   }
 
   private void preset_rename (int idx, String name) {
     com_uti.logd ("idx: " + idx);
     m_preset_tv [idx].setText (name);
     m_preset_name [idx] = name;
-    m_com_api.key_set ("chass_preset_name_" + idx, name, "chass_preset_freq_" + idx, m_preset_freq [idx]);   // !! Current implementation requires simultaneous
+    save_preset(idx, name, m_preset_freq[idx]);
   }
 
   private void preset_set (int idx) {
@@ -1722,7 +1728,7 @@ int f_freq_hi = 399999;
     m_preset_tv [idx].setText ("" + freq_text);
     m_preset_name [idx] = freq_text;
     m_preset_freq [idx] = m_com_api.tuner_freq;
-    m_com_api.key_set ("chass_preset_name_" + idx, "" + freq_text, "chass_preset_freq_" + idx, m_com_api.tuner_freq);   // !! Current implementation requires simultaneous
+    save_preset(idx, "" + freq_text, m_com_api.tuner_freq);
     m_preset_ib [idx].setImageResource (R.drawable.transparent);  // R.drawable.btn_preset
   }
 

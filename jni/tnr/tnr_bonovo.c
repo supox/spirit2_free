@@ -15,7 +15,14 @@
 #define AUDIO_CTRL_NODE "/dev/bonovo_handle"
 #define HANDLE_CTRL_DEV_MAJOR 230
 #define HANDLE_CTRL_DEV_MINOR 0
-#define IOCTL_HANDLE_CODEC_SWITCH_SRC _IO(HANDLE_CTRL_DEV_MAJOR, 30)
+#define IOCTL_HANDLE_GET_RADIO_STATUS       _IO(HANDLE_CTRL_DEV_MAJOR, 3)
+#define IOCTL_HANDLE_START_RADIO_SEARCH     _IO(HANDLE_CTRL_DEV_MAJOR, 4)
+#define IOCTL_HANDLE_STOP_RADIO_SEARCH      _IO(HANDLE_CTRL_DEV_MAJOR, 5)
+#define IOCTL_HANDLE_GET_RADIO_CURR_FREQ    _IO(HANDLE_CTRL_DEV_MAJOR, 6)
+#define IOCTL_HANDLE_GET_RADIO_FREQ         _IO(HANDLE_CTRL_DEV_MAJOR, 7)
+#define IOCTL_HANDLE_CODEC_SWITCH_SRC       _IO(HANDLE_CTRL_DEV_MAJOR, 30)
+#define IOCTL_HANDLE_CODEC_RECOVER_SRC      _IO(HANDLE_CTRL_DEV_MAJOR, 31)
+
 static int fd_bonovo = -1;
 
 #define RADIO_DEV_NODE "/dev/ttyS3"
@@ -47,6 +54,10 @@ typedef enum
     CODEC_LEVEL_COUNT
 }CODEC_Level;
 
+static int seek_stop();
+static int seek_start();
+static int freq_get();
+
 static unsigned int checkSum(unsigned char* cmdBuf, int size) {
   unsigned int sum = 0;
   int i;
@@ -59,7 +70,7 @@ static unsigned int checkSum(unsigned char* cmdBuf, int size) {
 static int send_command(const char cmd, const char param1, const char param2) {
   int rv = 0;
   unsigned int sum = 0;
-  unsigned char cmdBuf[10] = {0xFA, 0xFA, 0x0A,   0x00,
+  unsigned char cmdBuf[10] = {0xFA, 0xFA, 0x0A, 0x00,
                               0xA1, cmd,  param1, param2};
 
   if ((fd_radio < 0) || (fd_bonovo < 0)) {
@@ -72,7 +83,8 @@ static int send_command(const char cmd, const char param1, const char param2) {
   cmdBuf[9] = (sum >> 8) & 0xFF;
 
   if (rv = write(fd_radio, cmdBuf, cmdBuf[2]) < 0) {
-    logd("write " RADIO_DEV_NODE " error(%d, %s)\n", errno, strerror(errno));
+    int err = errno;
+    logd("write " RADIO_DEV_NODE " error(%d, %s)\n", err, strerror(err));
   }
   return rv;
 }
@@ -116,27 +128,47 @@ static int rbds_set(int band) {
   return (band);
 }
 
+struct radio_freq
+{
+	unsigned char freq[2];
+	unsigned char is_valid;
+};
+
 static int freq_get() {  // freq_sg
+	struct radio_freq temp;
+  int res;
+
+	do {
+    res = ioctl(fd_bonovo, IOCTL_HANDLE_GET_RADIO_FREQ, &temp);
+    if (res >= 0) {
+      curr_freq_int = 10 * (temp.freq[0] + (temp.freq[1] << 8));
+    }
+  } while(res >= 0);
+
+  // logd("freq_get, freq:%d\n", curr_freq_int);
+  curr_seek_state = 0;
   return (curr_freq_int);
 }
 
 static int freq_set(int freq) {
   logd("freq_set, freq:%d\n", freq);
-  int rv = send_command(CMD_RADIO_FREQ, freq & 0x0FF, (freq >> 8) & 0x0FF);
+  int freq10 = freq / 10;
+  int rv = send_command(CMD_RADIO_FREQ, freq10 & 0x0FF, (freq10 >> 8) & 0x0FF);
   if (rv != 0) {
     loge("Could not set radio frequency.");
     return rv;
   }
 
   curr_freq_int = freq;
-  rds_init();
+  // rds_init();
 
-  return 0;
+  return curr_freq_int;
 }
 
 int sls_status_chip_imp_pilot_sg_cnt = 0;
 
 static int activeAudio(CODEC_Level codec_mode) {
+  logd("Active audio\n");
   int ret = 0;
   if (fd_bonovo < 0) {
     return -1;
@@ -155,7 +187,6 @@ static int seek_stop() {
 
   int rv = send_command(CMD_RADIO_STOP_SEARCH, 0, 0);
   if (rv < 0) {
-    loge("seek_stop ret: %d errno: %d (%s)", rv, errno, strerror(errno));
     return (rv);
   }
 
@@ -166,27 +197,17 @@ static int seek_stop() {
 static int seek_start(int seek_state) {
   logd("seek_start");
 
-  const int bits = (seek_state == 2) ? 0x02 : 0x07;  // up=1, down=2
+  const int bits = (seek_state == 2) ? 0x02 : 0x03;  // up=1, down=2
   int rv = send_command(CMD_RADIO_START_SEARCH, bits, 0);
   if (rv < 0) {
     loge("seek_start ret: %d errno: %d (%s)", rv, errno, strerror(errno));
     return (rv);
   }
 
+  ioctl(fd_bonovo, IOCTL_HANDLE_START_RADIO_SEARCH);
   curr_seek_state = seek_state;
 
-  // TODO:
-  if (0) {
-    /*
-    this_freq = freq * 10;
-    curr_freq_int = this_freq;
-
-    curr_seek_state = 0;  // !!!! Still running ????      SSL only
-    rds_init();
-    return (curr_freq_int);  // curr_seek_state);
-    */
-  }
-  return (curr_seek_state);
+  return freq_get();
 }
 
 // Chip API:
@@ -215,20 +236,28 @@ int chip_imp_api_mode_sg(int api_mode) {
   return (curr_api_mode);
 }
 
-static int sendRadioCommand(char command) {
-  return -1;  // TODO!
+static int recoverAudio(CODEC_Level codec_mode) {
+  int ret = 0;
+
+  if (fd_bonovo < 0) {
+    return -EINVAL;
+  }
+  ret = ioctl(fd_bonovo, IOCTL_HANDLE_CODEC_RECOVER_SRC, codec_mode);
+  if(ret){
+    loge("[=== BONOVO ===]%s ioctl is error. ret:%d\n", __FUNCTION__, ret);
+  }
+  return ret;
 }
 
 static int close_dev() {
-  logd("android_radio_PowerOnoff off fd_radio='%d'", fd_radio);
+  logd("close_dev off fd_radio='%d'", fd_radio);
   if (fd_radio < 0) {
     loge("fd_radio was already off (fd_radio < 0)");
     return -EINVAL;
   }
-  // recoverAudio(CODEC_LEVEL_RADIO);
+  recoverAudio(CODEC_LEVEL_RADIO);
 
-  if (sendRadioCommand(CMD_RADIO_SHUTDOWN) < 0) {
-    loge("write " RADIO_DEV_NODE " error(%d, %s)\n", errno, strerror(errno));
+  if (send_command(CMD_RADIO_SHUTDOWN, 0, 0) < 0) {
     return -EINVAL;
   }
 
@@ -239,6 +268,7 @@ static int close_dev() {
 }
 
 static int open_dev() {
+  logd("open_dev");
   if ((fd_radio = open(RADIO_DEV_NODE, O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0) {
     loge("open %s failed,fd=%d(%d,%s)\n", RADIO_DEV_NODE, fd_radio, errno,
          strerror(errno));
@@ -267,7 +297,7 @@ int chip_imp_api_state_sg(int state) {
   } else {
     int rv = open_dev();
     if (rv == 0) curr_api_state = 1;
-    return rv;
+    return (curr_api_state);
   }
 }
 
@@ -347,7 +377,8 @@ int chip_imp_vol_sg(int vol) {
   if (vol == GET) return (curr_vol);
 
   int rv;
-  uint8_t vol_reg = vol / 6550;  // vol_reg = 0 - 100 from vol = 0 - 65535
+  uint8_t vol_reg = vol / 655;  // vol_reg = 0 - 100 from vol = 0 - 65535
+  logd("chip_imp_vol_sg %d->%d\n", vol, (int)vol_reg);
 
   if (vol_reg > 100) vol_reg = 100;
   if (rv = send_command(CMD_RADIO_VOLUME, vol_reg, 0) != 0) {
@@ -355,7 +386,7 @@ int chip_imp_vol_sg(int vol) {
     return rv;
   }
 
-  logd("chip_imp_vol_sg curr_vol: %d", curr_vol);
+  curr_vol = vol;
   return (curr_vol);
 }
 
@@ -370,8 +401,9 @@ int chip_imp_thresh_sg(int thresh) {
 int chip_imp_mute_sg(int mute) {
   if (mute == GET) return (curr_mute);
 
+  logd("chip_imp_mute_sg %d\n", mute);
   int rv;
-  if (rv = send_command(CMD_RADIO_MUTE, (mute ? 0 : 3), 0) != 0) {
+  if (rv = send_command(CMD_RADIO_MUTE, (mute ? 3 : 0), 0) != 0) {
     loge("Could not set radio mute.");
     return rv;
   }
@@ -385,7 +417,7 @@ int chip_imp_softmute_sg(int softmute) {
   if (softmute == GET) return (curr_softmute);
 
   int rv;
-  if (rv = send_command(CMD_RADIO_MUTE, (softmute ? 1 : 2), 0) != 0) {
+  if (rv = send_command(CMD_RADIO_MUTE, (softmute ? 3 : 0), 0) != 0) {
     loge("Could not set radio mute.");
     return rv;
   }

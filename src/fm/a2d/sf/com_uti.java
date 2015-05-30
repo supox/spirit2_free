@@ -1102,6 +1102,9 @@ Evo 4G LTE  jewel
       if (com_uti.file_get ("/dev/radio0") && com_uti.file_get ("/sys/devices/platform/APPS_FM.6")) {   // Qualcomm is always V4L and has this FM /sys directory
         com_uti.chass_plug_aud = "QCV";
       }
+      else if (com_uti.file_get ("/dev/bonovo_handle")) {
+        com_uti.chass_plug_aud = "BONOVO";
+      }
       else if (com_uti.file_get ("/dev/radio0") || com_uti.file_get ("/dev/fmradio")) {                 // Samsung GalaxyS class devices always have one of these driver names for Samsung Silicon Labs driver
         if (com_uti.file_get ("/sys/kernel/debug/asoc/smdkc110/wm8994-samsung-codec.4-001a/codec_reg"))
           com_uti.chass_plug_aud = "GS1";
@@ -1158,6 +1161,8 @@ Evo 4G LTE  jewel
       com_uti.chass_plug_tnr = "BCH";
     else if (com_uti.chass_plug_aud.equals ("XZ2"))
       com_uti.chass_plug_tnr = "BCH";
+    else if (com_uti.chass_plug_aud.equals ("BONOVO"))
+      com_uti.chass_plug_tnr = "BONOVO";
     else
       com_uti.chass_plug_tnr = "UNK";
 
@@ -1285,7 +1290,6 @@ Evo 4G LTE  jewel
   public static void prefs_set (Context context, String key, int val_int) {
     String val = "" + val_int;
     prefs_set (context, key, val);
-    return;
   }
   public static void prefs_set (Context context, String prefs_file, String key, String val) {
     com_uti.logd ("String: " + key + " = " + val);

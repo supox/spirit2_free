@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 import android.graphics.Canvas;
+import android.util.Log;
 
 public class gui_dia extends RelativeLayout implements OnGestureListener {
 
@@ -53,25 +54,19 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
 
     m_width = width;                                                    // Save width and height
     m_height = height;
-
-                                                                        // Load dial image
+    // Load dial image
     Bitmap src_bmp_dial1 = BitmapFactory.decodeResource (context.getResources (), dial_id);
-    Bitmap src_bmp_dial2 = null;
     Bitmap src_bmp_dial;
-    if (needle_id >= 0)
-      src_bmp_dial2 = BitmapFactory.decodeResource (context.getResources (), needle_id);
-    if (needle_id >= 0)
+    if (needle_id >= 0) {
+      Bitmap src_bmp_dial2 = BitmapFactory.decodeResource (context.getResources (), needle_id);
       src_bmp_dial = bitmaps_combine (src_bmp_dial1, src_bmp_dial2);
+    }
     else
       src_bmp_dial = src_bmp_dial1;
 
-    double scale_width = ((double) width) / src_bmp_dial.getWidth ();
-    double scale_height = ((double) height) / src_bmp_dial.getHeight ();
-    Matrix matrix = new Matrix ();
-    matrix.postScale ((float) scale_width, (float) scale_height);
-    bmp_dial = Bitmap.createBitmap (src_bmp_dial, 0, 0, src_bmp_dial.getWidth (), src_bmp_dial.getHeight () , matrix , true);
+    bmp_dial = Bitmap.createScaledBitmap (src_bmp_dial, m_width, m_height, true);
 
-                                                                        // Create dial
+    // Create dial
     iv_dial = new ImageView (context);
     RelativeLayout.LayoutParams lp_iv_dial = new RelativeLayout.LayoutParams (width, height);//LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     lp_iv_dial.addRule (RelativeLayout.CENTER_IN_PARENT);
@@ -91,13 +86,19 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
     m_listener = listener;
   }
 
+
   public void dial_angle_set (double angle) {                          // Set dial to angle
+    if(is_down_dial) // Dont set angle when rotating.
+      return;
+    dial_angle_set_force(angle);
+  }
+
+  public void dial_angle_set_force (double angle) {                          // Set dial to angle
     com_uti.logd ("angle: " + angle);
+
     angle = angle % 360;
-    Matrix matrix = new Matrix ();
-    iv_dial.setScaleType (ScaleType.MATRIX);   
-    matrix.postRotate ((float) angle, m_width / 2, m_height / 2);
-    iv_dial.setImageMatrix (matrix);
+    iv_dial.setScaleType (ScaleType.CENTER_INSIDE);   
+    iv_dial.setRotation((float)angle);
   }
   
     // Internal APIs:
@@ -155,15 +156,12 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
     if (Double.isNaN (angle))                                           // If angle not a valid number...
       return (false);                                                   // Event NOT consumed
 
-    //if (angle < 210 && angle > 150)                                   // Deny full rotation, start start and stop point, and get a linear scale
-    //  return (false);                                                 // Event NOT consumed
-
     boolean consumed = false;
     if (m_listener != null)
       consumed = m_listener.dial_chngd (angle);
 
     if (consumed)
-      dial_angle_set (angle);                                             // Rotate
+      dial_angle_set_force (angle);                                             // Rotate
 
     return (consumed);//true);                                                      // Event consumed
   }

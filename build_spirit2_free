@@ -1,16 +1,12 @@
 #!/bin/bash
-export MY_KEYSTORE_FILE="/home/ilan/dev/key/spirit2_free_key"
-export MY_KEYSTORE_PASS="password"
-export MY_KEY_NAME="ilanreidis_key"
+export MY_KEYSTORE_FILE="/home/supox/Desktop/nu3001/spirit2_free_key"
+export MY_KEYSTORE_PASS="supox1982"
+export MY_KEY_NAME="supox_key"
 export WS="/home/supox/Desktop/nu3001/source_code"
 export PROJ="spirit2_free"
 cd $WS/$PROJ
 
 rm -rf obj  # obj/local/armeabi/*
-rm -rf libs # libs/armeabi/
-
-mkdir libs
-
 /opt/adt-bundle-linux-x86_64-20140321/sdk/tools/android update project --target android-21 --path . --name $PROJ
 
 #mkdir -p res/raw
@@ -18,15 +14,15 @@ mkdir libs
 #cp ../raw/b1_bin    ../$PROJ/res/raw/
 #cp ../raw/b2_bin    ../$PROJ/res/raw/
 
-echo ndk-build start
-time /opt/android-ndk-r10d/ndk-build # 2>&1 |grep -i error
-
-mv libs/armeabi/s2d libs/armeabi/libs2d.so
-#mv libs/armeabi/ssd libs/armeabi/libssd.so
+# echo ndk-build start
+# rm -rf libs # libs/armeabi/
+# mkdir libs
+# time /opt/android-ndk-r10d/ndk-build # 2>&1 |grep -i error
+# mv libs/armeabi/s2d libs/armeabi/libs2d.so
 
 ant -q clean release
 
 jarsigner -storepass $MY_KEYSTORE_PASS -sigalg MD5withRSA -digestalg SHA1 -keystore $MY_KEYSTORE_FILE -signedjar bin/$PROJ-release-unaligned.apk bin/$PROJ-release-unsigned.apk $MY_KEY_NAME
-zipalign -f 4 bin/$PROJ-release-unaligned.apk bin/$PROJ-release.apk
+/opt/adt-bundle-linux-x86_64-20140321/sdk/build-tools/22.0.1/zipalign -f 4 bin/$PROJ-release-unaligned.apk bin/$PROJ-release.apk
 
-#adb install -r bin/$PROJ-release.apk
+/opt/adt-bundle-linux-x86_64-20140321/sdk/platform-tools/adb install -r bin/$PROJ-release.apk
