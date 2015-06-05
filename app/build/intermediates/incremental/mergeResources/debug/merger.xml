@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="/home/supox/StudioProjects/spirit2_free/app/src/main/res"><file name="unused_ani_record_time" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/anim/unused_ani_record_time.xml" qualifiers="" type="anim"/><file name="ani_preset_layout" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/anim/ani_preset_layout.xml" qualifiers="" type="anim"/><file name="ani_preset" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/anim/ani_preset.xml" qualifiers="" type="anim"/><file name="unused_ani_record" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/anim/unused_ani_record.xml" qualifiers="" type="anim"/><file name="ani_button" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/anim/ani_button.xml" qualifiers="" type="anim"/><file name="btn_volume_off" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_volume_off.png" qualifiers="xhdpi" type="drawable"/><file name="btn_pause_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_pause_press.png" qualifiers="xhdpi" type="drawable"/><file name="dial_black_bg" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_black_bg.png" qualifiers="xhdpi" type="drawable"/><file name="sel_stop" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_stop.xml" qualifiers="xhdpi" type="drawable"/><file name="sel_next" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_next.xml" qualifiers="xhdpi" type="drawable"/><file name="dial_power_off_250" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_off_250.png" qualifiers="xhdpi" type="drawable"/><file name="btn_close_pressed" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_close_pressed.png" qualifiers="xhdpi" type="drawable"/><file name="btn_menu" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_menu.png" qualifiers="xhdpi" type="drawable"/><file name="btn_ff_selected" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_ff_selected.png" qualifiers="xhdpi" type="drawable"/><file name="btn_record_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_record_press.png" qualifiers="xhdpi" type="drawable"/><file name="btn_play_pressed" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_play_pressed.png" qualifiers="xhdpi" type="drawable"/><file name="btn_menu_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_menu_press.png" qualifiers="xhdpi" type="drawable"/><file name="btn_preset" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_preset.png" qualifiers="xhdpi" type="drawable"/><file name="sel_menu" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_menu.xml" qualifiers="xhdpi" type="drawable"/><file name="btn_pause_bg" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_pause_bg.png" qualifiers="xhdpi" type="drawable"/><file name="btn_stop_bg_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_stop_bg_press.png" qualifiers="xhdpi" type="drawable"/><file name="btn_stop_bg_focus" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_stop_bg_focus.png" qualifiers="xhdpi" type="drawable"/><file name="sel_record" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_record.xml" qualifiers="xhdpi" type="drawable"/><file name="btn_pause_bg_focus" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_pause_bg_focus.png" qualifiers="xhdpi" type="drawable"/><file name="btn_close_normal" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_close_normal.png" qualifiers="xhdpi" type="drawable"/><file name="btn_menu_focus" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_menu_focus.png" qualifiers="xhdpi" type="drawable"/><file name="btn_prev_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_prev_press.png" qualifiers="xhdpi" type="drawable"/><file name="btn_prev_bg_focus" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_prev_bg_focus.png" qualifiers="xhdpi" type="drawable"/><file name="btn_record" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_record.png" qualifiers="xhdpi" type="drawable"/><file name="btn_close_selected" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_close_selected.png" qualifiers="xhdpi" type="drawable"/><file name="btn_stop_bg" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_stop_bg.png" qualifiers="xhdpi" type="drawable"/><file name="sel_prev_bg" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_prev_bg.xml" qualifiers="xhdpi" type="drawable"/><file name="btn_play_normal" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_play_normal.png" qualifiers="xhdpi" type="drawable"/><file name="btn_pause_focus" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_pause_focus.png" qualifiers="xhdpi" type="drawable"/><file name="dial_frequency" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_frequency.png" qualifiers="xhdpi" type="drawable"/><file name="btn_prev_bg" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_prev_bg.png" qualifiers="xhdpi" type="drawable"/><file name="btn_rw_normal" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_rw_normal.png" qualifiers="xhdpi" type="drawable"/><file name="btn_pause" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_pause.png" qualifiers="xhdpi" type="drawable"/><file name="btn_rw_selected" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_rw_selected.png" qualifiers="xhdpi" type="drawable"/><file name="btn_pause_bg_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_pause_bg_press.png" qualifiers="xhdpi" type="drawable"/><file name="sel_prev" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_prev.xml" qualifiers="xhdpi" type="drawable"/><file name="btn_stop" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_stop.png" qualifiers="xhdpi" type="drawable"/><file name="dial_power_off_250s" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_off_250s.png" qualifiers="xhdpi" type="drawable"/><file name="dial_power_on_250s" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_on_250s.png" qualifiers="xhdpi" type="drawable"/><file name="dial_power_off" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_off.png" qualifiers="xhdpi" type="drawable"/><file name="btn_next" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_next.png" qualifiers="xhdpi" type="drawable"/><file name="btn_volume" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_volume.png" qualifiers="xhdpi" type="drawable"/><file name="sel_stop_bg" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_stop_bg.xml" qualifiers="xhdpi" type="drawable"/><file name="btn_play_selected" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_play_selected.png" qualifiers="xhdpi" type="drawable"/><file name="btn_rw_pressed" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_rw_pressed.png" qualifiers="xhdpi" type="drawable"/><file name="dial_power_on_250" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_on_250.png" qualifiers="xhdpi" type="drawable"/><file name="btn_prev" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_prev.png" qualifiers="xhdpi" type="drawable"/><file name="btn_ff_pressed" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_ff_pressed.png" qualifiers="xhdpi" type="drawable"/><file name="dial_power_off_250sc" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_off_250sc.png" qualifiers="xhdpi" type="drawable"/><file name="btn_stop_focus" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_stop_focus.png" qualifiers="xhdpi" type="drawable"/><file name="sel_pause" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_pause.xml" qualifiers="xhdpi" type="drawable"/><file name="dial_power_on" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_on.png" qualifiers="xhdpi" type="drawable"/><file name="btn_ff_normal" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_ff_normal.png" qualifiers="xhdpi" type="drawable"/><file name="sel_pause_bg" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_pause_bg.xml" qualifiers="xhdpi" type="drawable"/><file name="dial_power_on_250sc" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/dial_power_on_250sc.png" qualifiers="xhdpi" type="drawable"/><file name="sel_preset" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/sel_preset.xml" qualifiers="xhdpi" type="drawable"/><file name="btn_stop_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_stop_press.png" qualifiers="xhdpi" type="drawable"/><file name="btn_next_press" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-xhdpi/btn_next_press.png" qualifiers="xhdpi" type="drawable"/><file name="spirit_sh" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/raw/spirit_sh" qualifiers="" type="raw"/><file name="img_icon_64_fr" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_icon_64_fr.png" qualifiers="" type="drawable"/><file name="transparent" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/transparent.png" qualifiers="" type="drawable"/><file name="btn_ff" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/btn_ff.xml" qualifiers="" type="drawable"/><file name="btn_rw" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/btn_rw.xml" qualifiers="" type="drawable"/><file name="img_signal_1" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_signal_1.png" qualifiers="" type="drawable"/><file name="img_icon" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_icon.png" qualifiers="" type="drawable"/><file name="img_icon_32" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_icon_32.png" qualifiers="" type="drawable"/><file name="stat_sys_headset" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/stat_sys_headset.png" qualifiers="" type="drawable"/><file name="img_signal_3" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_signal_3.png" qualifiers="" type="drawable"/><file name="img_icon_512" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_icon_512.png" qualifiers="" type="drawable"/><file name="img_signal_0" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_signal_0.png" qualifiers="" type="drawable"/><file name="btn_close" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/btn_close.xml" qualifiers="" type="drawable"/><file name="ic_lock_silent_mode_off" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/ic_lock_silent_mode_off.png" qualifiers="" type="drawable"/><file name="img_icon_128" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_icon_128.png" qualifiers="" type="drawable"/><file name="btn_play" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/btn_play.xml" qualifiers="" type="drawable"/><file name="img_signal_4" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_signal_4.png" qualifiers="" type="drawable"/><file name="img_signal_2" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_signal_2.png" qualifiers="" type="drawable"/><file name="state_button" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/state_button.xml" qualifiers="" type="drawable"/><file name="img_icon_64" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/img_icon_64.png" qualifiers="" type="drawable"/><file name="ic_menu_preferences" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-hdpi/ic_menu_preferences.png" qualifiers="hdpi" type="drawable"/><file name="ic_lock_power_off" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-hdpi/ic_lock_power_off.png" qualifiers="hdpi" type="drawable"/><file name="ic_menu_info_details" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-hdpi/ic_menu_info_details.png" qualifiers="hdpi" type="drawable"/><file name="ic_menu_view" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-hdpi/ic_menu_view.png" qualifiers="hdpi" type="drawable"/><file name="ic_menu_help" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-hdpi/ic_menu_help.png" qualifiers="hdpi" type="drawable"/><file name="freq_dial_needle" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-nodpi/freq_dial_needle.png" qualifiers="nodpi" type="drawable"/><file name="freq_dial_source" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable-nodpi/freq_dial_source.png" qualifiers="nodpi" type="drawable"/><file name="automotive_app_desc" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/xml/automotive_app_desc.xml" qualifiers="" type="xml"/><file name="prefs" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/xml/prefs.xml" qualifiers="" type="xml"/><file name="gui_pg1_layout" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout/gui_pg1_layout.xml" qualifiers="" type="layout"/><file name="edit_text" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout/edit_text.xml" qualifiers="" type="layout"/><file name="gui_gui_layout" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout/gui_gui_layout.xml" qualifiers="" type="layout"/><file name="gui_pg2_layout" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout/gui_pg2_layout.xml" qualifiers="" type="layout"/><file name="edit_number" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout/edit_number.xml" qualifiers="" type="layout"/><file path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/values/strings.xml" qualifiers=""><string name="copyright_msg">
+    Spirit is Copyright (c) 2011-2015 Michael A. Reid. All rights reserved.
+  </string></file><file path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/values/arrays.xml" qualifiers=""><string-array name="state_2">
+  <item/>
+  <item>Start</item>
+  <item>Stop</item>
+  </string-array><string-array name="state_3">
+  <item/>
+  <item>Start</item>
+  <item>Stop</item>
+  <item>Pause</item>
+  </string-array><string-array name="a3">
+  <item/>
+  <item>.</item>
+  <item>.</item>
+  <item>Disable</item>
+  </string-array><string-array name="a2">
+  <item/>
+  <item>.</item>
+  <item>.</item>
+  <item>Disable</item>
+  </string-array><string-array name="a1">
+  <item/>
+  <item>.</item>
+  <item>.</item>
+  <item>Disable</item>
+  </string-array><string-array name="chass_plug_aud">
+  <item/>
+  <item>GS1</item>
+  <item>GS2</item>
+  <item>GS3</item>
+  <item>QCV</item>
+  <item>OM7</item>
+  <item>LG2</item>
+  <item>XZ2</item>
+  <item>CUS</item>
+  </string-array><string-array name="tuner_mode">
+  <item/>
+  <item>Receive</item>
+  <item>Transmit</item>
+  </string-array><string-array name="audio_mode">
+  <item/>
+  <item>Digital</item>
+  <item>Analog</item>
+  <item>TestMic</item>
+  </string-array><string-array name="values_4">
+  <item/>
+  <item>1</item>
+  <item>2</item>
+  <item>3</item>
+  <item>4</item>
+  </string-array><string-array name="chass_plug_dev_old2">
+  <item/>
+  <item>GT-I9300</item>
+  <item>GT-I9100</item>
+  <item>GT-I9000</item>
+  <item>GT-N7100</item>
+  <item>GT-N7000</item>
+  <item>One-M8</item>
+  <item>One-XLte</item>
+  <item>Moto-G</item>
+  <item>One-M7</item>
+  <item>LG-G2</item>
+  <item>Sony-Z1-</item>
+  <item>Sony-Z2+</item>
+  <item>QCom-All</item>
+  </string-array><string-array name="chass_action">
+  <item/>
+  <item>Preset -</item>
+  <item>Preset +</item>
+  <item>Seek -</item>
+  <item>Seek +</item>
+  <item>Volume +</item>
+  <item>Volume -</item>
+  <item>Mute Tog</item>
+  <item>Mute +</item>
+  <item>Mute -</item>
+  <item>Record Tog</item>
+  <item>Record +</item>
+  <item>Record -</item>
+  <item>Output Tog</item>
+  <item>Speaker +</item>
+  <item>Headset +</item>
+  <item>Next Handler</item>
+  <item>Disable</item>
+  </string-array><string-array name="state_4">
+  <item/>
+  <item>Start</item>
+  <item>Stop</item>
+  <item>Pause</item>
+  <item>ReStart</item>
+  </string-array><string-array name="chass_plug_tnr_old">
+  <item>SSL-SamsungGalaxySiliconLabs</item>
+  <item>QCV-QualcommV4L</item>
+  <item>BCM-Broadcom</item>
+  <item/>
+  </string-array><string-array name="audio_output">
+  <item/>
+  <item>Headset</item>
+  <item>Speaker</item>
+  </string-array><string-array name="chass_plug_aud_old">
+  <item>GT-I9300/GT-N7100</item>
+  <item>GT-I9100/GT-N7000</item>
+  <item>GT-I9000</item>
+  <item>QCV-Qualcomm All</item>
+  <item>One-M7</item>
+  <item>LG-G2</item>
+  <item>Sony-Z2+</item>
+  <item/>
+  </string-array><string-array name="audio_stereo">
+  <item/>
+  <item>Stereo</item>
+  <item>Mono</item>
+  </string-array><string-array name="tuner_stereo">
+  <item/>
+  <item>Blend</item>
+  <item>Switch</item>
+  <item>Stereo</item>
+  <item>Mono</item>
+  </string-array><string-array name="chass_plug_dev_old">
+  <item/>
+  <item>3N2:GS3/NO2</item>
+  <item>2N1:GS2/NO1</item>
+  <item>GS1</item>
+  <item>QCV:OXL/XZ0/XZ1/OM8/MOG</item>
+  <item>OM7</item>
+  <item>LG2</item>
+  <item>XZ2</item>
+  </string-array><string-array name="enable_disable">
+  <item/>
+  <item>Enable</item>
+  <item>Disable</item>
+  </string-array><string-array name="index_values_old">
+  <item>0</item>
+  <item>1</item>
+  <item>2</item>
+  <item>3</item>
+  <item>4</item>
+  <item>5</item>
+  <item>6</item>
+  <item>7</item>
+  <item>8</item>
+  <item>9</item>
+  <item>10</item>
+  <item>11</item>
+  <item>12</item>
+  <item>13</item>
+  <item>14</item>
+  <item>15</item>
+  <item>16</item>
+  <item>17</item>
+  <item>18</item>
+  <item>19</item>
+  <item>20</item>
+  <item>21</item>
+  <item>22</item>
+  <item>23</item>
+  <item>24</item>
+  <item>25</item>
+  <item>26</item>
+  <item>27</item>
+  <item>28</item>
+  <item>29</item>
+  <item>30</item>
+  <item>31</item>
+  <item>32</item>
+  <item>33</item>
+  <item>34</item>
+  <item>35</item>
+  </string-array><string-array name="chass_plug_tnr">
+  <item/>
+  <item>SSL</item>
+  <item>QCV</item>
+  <item>BCH</item>
+  <item>CUS</item>
+  </string-array><string-array name="audio_pseudo_source">
+  <item/>
+  <item>0  = Default</item>
+  <item>1  = Mike</item>
+  <item>2  = Voice Uplink</item>
+  <item>3  = Voice Downlink</item>
+  <item>4  = Voice Call</item>
+  <item>5  = Camcorder</item>
+  <item>6  = Voice Recognition</item>
+  <item>7  = Voice Communication</item>
+  <item>8  = Remote Submix</item>
+  <item>9  = FM1</item>
+  <item>10 = FM2</item>
+  <item>11 = FM3</item>
+  <item>12 = FM4</item>
+  <item>13 = FM5</item>
+  <item>14 = FM6</item>
+  <item>15 = FM7</item>
+  </string-array><string-array name="dynamic_metadata">
+  <item/>
+  <item>Preset</item>
+  <item>Frequency</item>
+  <item>RDS PI Hex</item>
+  <item>RDS PI Call</item>
+  <item>RDS PT</item>
+  <item>RDS PS</item>
+  <item>RDS RT</item>
+  <item>Disable</item>
+  </string-array><string-array name="chass_antenna_action_old">
+  <item/>
+  <item>Warn</item>
+  <item>Ignore</item>
+  <item>Mute</item>
+  <item>PowerOff</item>
+  </string-array><string-array name="tuner_band">
+  <item/>
+  <item>EU</item>
+  <item>US</item>
+  <item>UU</item>
+  </string-array><string-array name="tuner_antenna">
+  <item/>
+  <item>External</item>
+  <item>Internal</item>
+  </string-array></file><file path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/values/colors.xml" qualifiers=""><color name="btn_preset_press">#55000000</color><color name="btn_preset_focus">#33000000</color></file><file name="edit_number" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout-land/edit_number.xml" qualifiers="land" type="layout"/><file name="edit_text" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout-land/edit_text.xml" qualifiers="land" type="layout"/><file name="gui_gui_layout" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout-land/gui_gui_layout.xml" qualifiers="land" type="layout"/><file name="gui_pg1_layout" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout-land/gui_pg1_layout.xml" qualifiers="land" type="layout"/><file name="gui_pg2_layout" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/layout-land/gui_pg2_layout.xml" qualifiers="land" type="layout"/><file name="drop_shadow" path="/home/supox/StudioProjects/spirit2_free/app/src/main/res/drawable/drop_shadow.xml" qualifiers="" type="drawable"/></source><source path="/home/supox/StudioProjects/spirit2_free/app/build/generated/res/rs/debug"/><source path="/home/supox/StudioProjects/spirit2_free/app/build/generated/res/generated/debug"/></dataSet><dataSet config="debug"><source path="/home/supox/StudioProjects/spirit2_free/app/src/debug/res"/></dataSet><mergedItems/></merger>

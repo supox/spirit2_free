@@ -1,6 +1,3 @@
-bin/*
-gen/*
-libs*
+build
+app/build
 local.properties
-project.properties
-build_spirit2_free
