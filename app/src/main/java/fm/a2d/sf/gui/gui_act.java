@@ -4,35 +4,29 @@
 
 package fm.a2d.sf.gui;
 
-import android.app.Activity;
-import android.app.Dialog;
+    import android.app.Activity;
+    import android.app.Dialog;
+    import android.content.BroadcastReceiver;
+    import android.content.Context;
+    import android.content.Intent;
+    import android.content.IntentFilter;
+    import android.os.Bundle;
+    import android.view.Menu;
+    import android.view.MenuItem;
+    import android.view.View;
 
-import android.content.Intent;
-
-import android.os.Bundle;
-
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
-
-import fm.a2d.sf.com.com_api;
-import fm.a2d.sf.com.com_uti;
-import fm.a2d.sf.service.svc_aud;
+    import fm.a2d.sf.com.com_api;
+    import fm.a2d.sf.com.com_uti;
+    import fm.a2d.sf.service.svc_aud;
 
     public class gui_act extends Activity {                                 // public class gui_act extends Fragment {       Much work required for fragment implementation
 
+      public static com_api m_com_api = null;
   private static    int                 m_obinits   = 0;
   private static    int                 m_creates   = 0;
-
-  public static     Context             m_context   = null;
-  public static com_api m_com_api   = null;
-
-  private           gui_gap             m_gui_gap   = null;
+      private static Context m_context = null;
   private static    BroadcastReceiver   m_gap_bcr   = null;
+      private gui_gap m_gui_gap = null;
 
     // Lifecycle:
 
@@ -52,7 +46,6 @@ import fm.a2d.sf.service.svc_aud;
       m_com_api = new com_api (this);                                   // Instantiate Common API   class
       if (m_com_api == null) {
         com_uti.loge ("m_com_api: " + m_com_api);
-        return;
       }
       else
         com_uti.logd ("m_com_api: " + m_com_api);
@@ -267,9 +260,7 @@ import fm.a2d.sf.service.svc_aud;
     com_uti.logd ("menu: " + menu);
     super.onCreateOptionsMenu (menu);
 
-    boolean bret = m_gui_gap.gap_menu_create (menu);
-
-    return (bret);//true);
+    return (m_gui_gap.gap_menu_create(menu));//true);
   }
 
   @Override
@@ -283,9 +274,7 @@ import fm.a2d.sf.service.svc_aud;
   @Override
   public boolean onOptionsItemSelected (MenuItem item) {
     com_uti.logd ("item: " + item);                              // When "Settings" is selected, after pressing Menu key
-
-    boolean bret = m_gui_gap.gap_menu_select (item.getItemId ());
-
+    m_gui_gap.gap_menu_select(item.getItemId());
     return (super.onOptionsItemSelected (item));
   }
 

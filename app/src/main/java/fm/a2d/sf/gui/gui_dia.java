@@ -4,6 +4,7 @@ package fm.a2d.sf.gui;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
@@ -11,7 +12,6 @@ import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
-import android.graphics.Canvas;
 
 import fm.a2d.sf.com.com_uti;
 
@@ -19,16 +19,13 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
 
   private static int    m_obinits = 1;
 
-  private GestureDetector   gest_det;
+  private final GestureDetector gest_det;
+  private final ImageView iv_dial;
+  private final Bitmap bmp_dial;
+  private final double corner_lo = 0.8;//0.85;
+  private final double corner_hi = 0.2;//0.15;
   private int               m_width = 0;
   private int               m_height= 0;
-
-  private ImageView         iv_dial;
-  private Bitmap            bmp_dial;
-
-  private double corner_lo = 0.8;//0.85;
-  private double corner_hi = 0.2;//0.15;
-
   private boolean is_down_powr = false;
   private boolean is_down_dial = false;
   private boolean is_down_next = false;
@@ -36,15 +33,6 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
 
     // Callback interface:
   private gui_dia_listener m_listener;
-  interface gui_dia_listener {
-    public boolean  state_chngd ();                                         // Previously had (boolean newstate), but now just an externally handled toggle
-    public boolean  dial_chngd (double angle);
-    public boolean  freq_go ();
-    public boolean  prev_go ();
-    public boolean  next_go ();
-  }
-
-
     // Dial Constructor
   public gui_dia (Context context, int dial_id, int needle_id, int width, int height) {
     super (context);
@@ -77,16 +65,15 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
 
     gest_det = new GestureDetector (getContext (), this);               // Enable gesture detector
   }
+
+  public void listener_set(gui_dia_listener listener) {
+    com_uti.logd("listener: " + listener);
+    m_listener = listener;
+  }
   
 
 
     // Public APIs:
-
-  public void listener_set (gui_dia_listener listener) {
-    com_uti.logd ("listener: " + listener);
-    m_listener = listener;
-  }
-
 
   public void dial_angle_set (double angle) {                          // Set dial to angle
     if(is_down_dial) // Dont set angle when rotating.
@@ -94,21 +81,20 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
     dial_angle_set_force(angle);
   }
 
-  public void dial_angle_set_force (double angle) {                          // Set dial to angle
+  private void dial_angle_set_force(double angle) {                          // Set dial to angle
     com_uti.logd ("angle: " + angle);
 
     angle = angle % 360;
-    iv_dial.setScaleType (ScaleType.CENTER_INSIDE);   
+    iv_dial.setScaleType(ScaleType.CENTER_INSIDE);
     iv_dial.setRotation((float)angle);
+  }
+
+  private double angle_get(double x, double y) {                       // Cartesian x,y to Polar degrees
+    //com_uti.logd ("x: " + x + "  y: " + y);
+    return -Math.toDegrees(Math.atan2(x - 0.5, y - 0.5));
   }
   
     // Internal APIs:
-
-  private double angle_get (double x, double y) {                       // Cartesian x,y to Polar degrees
-    //com_uti.logd ("x: " + x + "  y: " + y);
-    return (double) -Math.toDegrees (Math.atan2 (x - 0.5, y - 0.5));
-  }
-
 
   private Bitmap bitmaps_combine (Bitmap bmp1, Bitmap bmp2) {
     com_uti.logd ("bmp1: " + bmp1 + "  bmp2: " + bmp2);
@@ -128,7 +114,7 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
       com_uti.logd ("outside center  x: " + x + "  y: " + y);
       return (false);
     }
-  }  
+  }
 
   private boolean in_next_get (double x, double y) {                    // Return true if within next
     if (x >= corner_lo && x <= 1.1 && y >= -0.1 && y <= corner_hi) {    // If within next boundaries...
@@ -139,7 +125,7 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
       com_uti.logd ("outside next  x: " + x + "  y: " + y);
       return (false);
     }
-  }  
+  }
 
   private boolean in_prev_get (double x, double y) {                    // Return true if within prev
     if (x >= -0.1 && x <= corner_hi && y >= -0.1 && y <= corner_hi) {   // If within prev boundaries...
@@ -150,7 +136,7 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
       com_uti.logd ("outside prev  x: " + x + "  y: " + y);
       return (false);
     }
-  }  
+  }
 
   private boolean angle_set (double x, double y) {                      //
     double angle = angle_get (1 - x, 1 - y);                            // 1- to correct our custom axis direction
@@ -167,52 +153,51 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
     return (consumed);//true);                                                      // Event consumed
   }
 
-    // For android.view.GestureDetector.OnGestureListener:
-
-  public boolean onTouchEvent (MotionEvent motion_event) {
+  public boolean onTouchEvent(MotionEvent motion_event) {
     //com_uti.logd ("motion_event: " + motion_event);
 
-    getParent().requestDisallowInterceptTouchEvent (true);              // Don't do horizontal scroll
+    getParent().requestDisallowInterceptTouchEvent(true);              // Don't do horizontal scroll
 
-    boolean have_gest_det = gest_det.onTouchEvent (motion_event);
+    boolean have_gest_det = gest_det.onTouchEvent(motion_event);
     //com_uti.logd ("motion_event: " + motion_event + "  have_gest_det: " + have_gest_det);
     if (have_gest_det) {
-      com_uti.logd ("motion_event: " + motion_event + "  have_gest_det: " + have_gest_det);
+      com_uti.logd("motion_event: " + motion_event + "  have_gest_det: " + have_gest_det);
       return (true);                                                    // Event consumed
     }
 
     if (is_down_dial) {
-      double x = x_motion_get (motion_event);
-      double y = y_motion_get (motion_event);
+      double x = x_motion_get(motion_event);
+      double y = y_motion_get(motion_event);
       //com_uti.logd ("motion_event: " + motion_event + "  x: " + x + "  y: " + y);
 
-      if (in_center_get (x, y)) {                                       // If within center boundaries...
+      if (in_center_get(x, y)) {                                       // If within center boundaries...
         //if (m_listener != null)
         //  consumed = m_listener.state_chngd ();                                  // onSingleTapUp handles
         return (true);                                                  // Event consumed
       }
-      boolean consumed = motion_angle_set (motion_event);
+      boolean consumed = motion_angle_set(motion_event);
       if (consumed)
         return (consumed);
     }
 
-    boolean super_ret = super.onTouchEvent (motion_event);
+    boolean super_ret = super.onTouchEvent(motion_event);
     //com_uti.logd ("super_ret: " + super_ret);
-    com_uti.logd ("motion_event: " + motion_event + "  have_gest_det: " + have_gest_det + "  super_ret: " + super_ret);
+    com_uti.logd("motion_event: " + motion_event + "  have_gest_det: " + have_gest_det + "  super_ret: " + super_ret);
     return (super_ret);                                                 // Event consumed or NOT consumed as per super
 
     //return (false);                                                   // Event NOT consumed
   }
 
+    // For android.view.GestureDetector.OnGestureListener:
+
+  private double x_motion_get(MotionEvent motion_event) {
+    return (motion_event.getX() / ((double) getWidth()));
+  }
+
   //private state_toggle
 
-  private double x_motion_get (MotionEvent motion_event) {
-    double x = motion_event.getX () / ((double) getWidth ());
-    return (x);
-  }
   private double y_motion_get (MotionEvent motion_event) {
-    double y = motion_event.getY () / ((double) getHeight ());
-    return (y);
+    return (motion_event.getY() / ((double) getHeight()));
   }
 
   public boolean onDown (MotionEvent motion_event) {                    // Called when tap starts/down
@@ -240,9 +225,10 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
       if (consumed)
         return (consumed);
     }
- 
+
     return (false);                                                     // Event NOT consumed
   }
+
   //private double             angle_down, angle_up;
   public boolean onSingleTapUp (MotionEvent motion_event) {             // Called when tap ends/up
     com_uti.logd ("motion_event: " + motion_event);
@@ -251,7 +237,7 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
     //angle_up = angle_get (1 - x, 1 - y);                              // 1- to correct our custom axis direction
     com_uti.logd ("x: " + x + "  y: " + y);
 
-    boolean consumed = false;   
+    boolean consumed = false;
     //if (! Float.isNaN (angle_down) && ! Float.isNaN (angle_up) && Math.abs (angle_up-angle_down) < 10) {  // If click up where we clicked down it's just a button press
     if (is_down_dial) {
       is_down_dial = false;
@@ -285,24 +271,37 @@ public class gui_dia extends RelativeLayout implements OnGestureListener {
   private boolean motion_angle_set (MotionEvent motion_event) {
     double x = x_motion_get (motion_event);
     double y = y_motion_get (motion_event);
-    boolean consumed = angle_set (x, y);
-    return (consumed);
+    return (angle_set(x, y));
   }
+
   public boolean onScroll (MotionEvent motion_event1, MotionEvent motion_event2, float dist_x, float dist_y) {
     com_uti.logd ("motion_event1: " + motion_event1 + "motion_event2: " + motion_event2 + "  dist_x: " + dist_x + "  dist_y: " + dist_y);
-    boolean consumed = motion_angle_set (motion_event2);
-    return (consumed);
+    return (motion_angle_set(motion_event2));
   }
 
   public void onShowPress (MotionEvent motion_event) {
     com_uti.logd ("motion_event: " + motion_event);
   }
+
   public boolean onFling (MotionEvent motion_event1, MotionEvent motion_event2, float fling1, float fling2) {
 //    com_uti.logd ("motion_event1: " + motion_event1 + "motion_event2: " + motion_event2 + "  fling1: " + fling1 + "  fling2: " + fling2);
     return (false);                                                     // Event NOT consumed
   }
+
   public void onLongPress (MotionEvent motion_event) {
     com_uti.logd ("motion_event: " + motion_event);
+  }
+
+  interface gui_dia_listener {
+    boolean state_chngd();                                         // Previously had (boolean newstate), but now just an externally handled toggle
+
+    boolean dial_chngd(double angle);
+
+    boolean freq_go();
+
+    boolean prev_go();
+
+    boolean next_go();
   }
 
 /* Don't need:

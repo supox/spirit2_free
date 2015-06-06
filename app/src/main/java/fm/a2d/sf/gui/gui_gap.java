@@ -4,27 +4,23 @@
 package fm.a2d.sf.gui;
 
 import android.app.Dialog;
-
 import android.content.Intent;
-
+import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
-import android.os.Bundle;
+    interface gui_gap {                                              // GUI API definition:
 
-public interface gui_gap {                                              // GUI API definition:
+      boolean gap_state_set(String state);
 
-  public abstract boolean   gap_state_set       (String state);
+      void gap_service_update(Intent intent);
 
-  public abstract void      gap_service_update  (Intent intent);
+      void gap_gui_clicked(View v);
 
-  public abstract void      gap_gui_clicked     (View v);
+      Dialog gap_dialog_create(int id, Bundle args);
 
-  public abstract Dialog    gap_dialog_create   (int id, Bundle args);
+      boolean gap_menu_create(Menu menu);
 
-  public abstract boolean   gap_menu_create     (Menu menu);
-
-  public abstract boolean   gap_menu_select     (int itemid);
+      boolean gap_menu_select(int itemid);
 
 }

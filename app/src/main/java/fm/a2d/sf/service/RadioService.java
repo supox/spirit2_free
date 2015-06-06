@@ -28,6 +28,7 @@ import fm.a2d.sf.com.com_uti;
 import fm.a2d.sf.domain.AFState;
 import fm.a2d.sf.domain.Band;
 import fm.a2d.sf.domain.Frequency;
+import fm.a2d.sf.domain.Preset;
 import fm.a2d.sf.domain.RDSState;
 import fm.a2d.sf.domain.Region;
 import fm.a2d.sf.domain.StereoState;
@@ -56,19 +57,11 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
     private com_api m_com_api = null;
     private svc_aap m_svc_aap = null;
 
-    // private int                start_type  = START_NOT_STICKY;             // Don't restart if killed; not important enough to restart, which may crash again. ?? But still restarts ??
-    private int start_type = START_STICKY;                 // !!!! See if Sticky reduces audio dropouts
-
     private Timer tuner_state_start_tmr = null;
-
-    private boolean rfkill_state_set_on = false;
 
     private AudioManager m_AM = null;
 
-    private boolean remote_rcc_enable = false;
     private boolean service_update_gui = true;
-    private boolean service_update_notification = true;
-    private boolean service_update_remote = true;
     private PresetsManager m_PresetManager;
     private IRadio m_Radio;
     private PowerManager pmgr = null;
@@ -82,7 +75,6 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
     com_uti.logd ("");
     }*/
     private boolean need_audio_start_after_tuner_start = false;
-    private boolean disable_wifi_hack = false;//true;
 
     @Override
     public void onCreate() {                                             // When service newly created...
@@ -90,16 +82,9 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
         m_PresetManager = new PresetsManager(m_context);
 
         try {
-
-            //strict_mode_set (true);                                         // Disabled due to remaining main thread issues
-
             if (m_com_api == null) {                                          // If not yet initialized...
                 m_com_api = new com_api(this);                                 // Instantiate Common API   class
-                if (m_com_api == null) {
-                    com_uti.loge("m_com_api: " + m_com_api);
-                    return;
-                } else
-                    com_uti.logd("m_com_api: " + m_com_api);
+                com_uti.logd("m_com_api: " + m_com_api);
             }
             m_Radio = new RadioController(m_context, m_com_api);
             m_Radio.setListener(this);
@@ -111,6 +96,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
 
             m_AM = (AudioManager) m_context.getSystemService(Context.AUDIO_SERVICE);
 
+            boolean remote_rcc_enable = false;
             if (com_uti.s2_tx_apk()) {                                       // If Transmit APK
                 remote_rcc_enable = false;                                      // Remote/RCC not needed, for receive only
             }
@@ -128,12 +114,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
             String update_gui = com_uti.prefs_get(m_context, "service_update_gui", "");
             service_update_gui = !update_gui.equals("Disable");
             String update_notification = com_uti.prefs_get(m_context, "service_update_notification", "");
-            service_update_notification = !update_notification.equals("Disable");
             String update_remote = com_uti.prefs_get(m_context, "service_update_remote", "");
-            service_update_remote = !update_remote.equals("Disable");
-
-            //foreground_start ();
-
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -141,14 +122,8 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
 
     @Override
     public void onDestroy() {
-        com_uti.logd("");
-
-        com_uti.logd("com_uti.num_daemon_get:              " + com_uti.num_daemon_get);
-        com_uti.logd("com_uti.num_daemon_set:              " + com_uti.num_daemon_set);
-
-        if (m_com_api != null) {
-            com_uti.logd("m_com_api.num_key_set:             " + m_com_api.num_key_set);
-            com_uti.logd("m_com_api.num_api_service_update:  " + m_com_api.num_api_service_update);
+        if (m_com_api == null) {
+            return;
         }
 
         if (!m_com_api.audio_state.equals("Stop"))
@@ -163,18 +138,6 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
         foreground_stop();
 
         m_Radio = null;
-    }
-
-    private PendingIntent createAction(String key, String val) {
-        Intent resultIntent = new Intent(this, RadioService.class);
-        resultIntent.putExtra(key, val);
-        PendingIntent pIntent = PendingIntent.getService(
-                this,
-                0,
-                resultIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-        return pIntent;
     }
 
 
@@ -226,6 +189,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
     public int onStartCommand(Intent intent, int flags, int startId) {   //
         com_uti.logd("intent: " + intent + "  flags: " + flags + "  startId: " + startId);
 
+        int start_type = START_STICKY;
         try {
 
             if (intent == null) {
@@ -249,7 +213,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
             }
             com_uti.logd("extras: " + extras.describeContents());
 
-            String val = "";                                                    // Value used for many
+            String val;
 
 
             // audio_android_smo    // ?? setMode == setPhoneState ???
@@ -443,10 +407,6 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
 
             val = extras.getString("service_update_gui", "");
             service_update_gui = !val.equals("Disable");
-            val = extras.getString("service_update_notification", "");
-            service_update_notification = !val.equals("Disable");
-            val = extras.getString("service_update_remote", "");
-            service_update_remote = !val.equals("Disable");
 
             service_update_send();                                             // Update GUI/Widget/Remote/Notification with latest data
 
@@ -470,16 +430,13 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
         if (pmgr == null)
             pmgr = (PowerManager) m_context.getSystemService(Context.POWER_SERVICE);
 
-        boolean screen_on = pmgr.isScreenOn();
+        boolean screen_on = (com_uti.android_version >= 21) ? pmgr.isInteractive() : pmgr.isScreenOn();
         if (!screen_on)
             return;
 
-        if (screen_on && service_update_gui) {
+        if (service_update_gui) {
             Intent service_update_intent = service_update_send();            // Send Intent to send and Update widgets, GUI(s), other components and
             m_com_api.api_service_update(service_update_intent);             // Update our copy of data in Radio API using Intent
-        }
-
-        if (screen_on && service_update_notification) {
         }
 
     }
@@ -541,7 +498,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
     }
 
     private void preset_next(boolean up) {
-        final List<PresetsManager.Preset> presets = m_PresetManager.getPresets();
+        final List<Preset> presets = m_PresetManager.getPresets();
         int presetIndex = m_PresetManager.getActivePresetIndex();
 
         for (int index = 0; index < com_api.chass_preset_max; index++) {
@@ -553,7 +510,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
             presetIndex = presetIndex % presets.size();
             if (presetIndex < 0) presetIndex += presets.size();
 
-            PresetsManager.Preset preset = presets.get(presetIndex);
+            Preset preset = presets.get(presetIndex);
             if (preset.isValid) {
                 tuner_freq_set(preset.freq);
                 return;
@@ -564,7 +521,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
 
     // Audio State callback called only by svc_aud: audio_state_set()
 
-    private String audio_state_set(String desired_state) {               // Called only by onStartCommand()
+    private void audio_state_set(String desired_state) {               // Called only by onStartCommand()
         com_uti.logd("desired_state: " + desired_state);
         if (desired_state.equals("Toggle")) {                    // TOGGLE:
             if (m_com_api.audio_state.equals("Start"))
@@ -575,18 +532,17 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
         // If Audio Stop or Pause...
         if (desired_state.equals("Stop") || desired_state.equals("Pause")) {
             m_svc_aap.audio_state_set(desired_state);                        // Set Audio State synchronously
-            return (m_com_api.audio_state);                                   // Return current audio state
+            return;                                   // Return current audio state
         }
 
-        if (desired_state.equals("Start")) {
-        } else {
+        if (!desired_state.equals("Start")) {
             com_uti.loge("Unexpected desired_state: " + desired_state);
-            return (m_com_api.audio_state);                                   // Return current audio state
+            return;                                   // Return current audio state
         }
 
         // Else if Audio Start desired...
         if (m_com_api.audio_state.equals("Start"))               // If audio already started...
-            return (m_com_api.audio_state);                                   // Return current audio state
+            return;                                   // Return current audio state
 
         // Else if audio stopped or paused and we want to start audio...
         String mode = com_uti.prefs_get(m_context, "audio_mode", "Digital");
@@ -602,7 +558,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
             tuner_state_set("Start");                                        // Start tuner first, audio will start later via callback
         }
 
-        return (m_com_api.audio_state);                                     // Return current audio state
+        return;                                     // Return current audio state
     }
 
 
@@ -611,27 +567,30 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
     public void cb_audio_state(String new_audio_state) {                 // Audio state changed callback from svc_aud
         com_uti.logd("new_audio_state: " + new_audio_state);
 
-        if (new_audio_state.equals("Start")) {                             // If new audio state = Start...
-            //service_update_send ();                                         // Update GUI/Widget/Remote/Notification with latest data
+        switch (new_audio_state) {
+            case "Start":
 
-            if (m_com_api.chass_plug_aud.equals("QCV")) // && com_uti.om8_get ())    // !!!!!! remove om8_get for similar devices (LG G3 ?)
-                com_uti.ms_sleep(200);                                         // Otherwise M8 gets pop at start; 100 ms not enough
 
-            com_uti.daemon_set("tuner_mute", "Unmute");                      // Finally unmute tuner audio now that audio start has completed (!! ensure digital output does not require unmute earlier !)
-        } else if (new_audio_state.equals("Stop")) {                         // Else if new audio state = Stop...
-            //service_update_send ();                                         // Update GUI/Widget/Remote/Notification with latest data
-        } else if (new_audio_state.equals("Pause")) {                        // Else if new audio state = Pause...
-            //service_update_send ();                                         // Update GUI/Widget/Remote/Notification with latest data
-            // Remote State = Still Playing
-        } else {
-            com_uti.loge("Unexpected new_audio_state: " + new_audio_state);
-            return;
+                if (m_com_api.chass_plug_aud.equals("QCV"))
+                    com_uti.ms_sleep(200);
+
+                com_uti.daemon_set("tuner_mute", "Unmute");
+
+                break;
+            case "Stop":
+
+                break;
+            case "Pause":
+                break;
+            default:
+                com_uti.loge("Unexpected new_audio_state: " + new_audio_state);
+                return;
         }
 
-        displaysUpdate();                                 // Update all displays/data sinks
+        displaysUpdate();
     }
 
-    private String tuner_state_set(String desired_state) {               // Called only by onStartCommand(), (maybe onDestroy in future)
+    private void tuner_state_set(String desired_state) {               // Called only by onStartCommand(), (maybe onDestroy in future)
         com_uti.logd("desired_state: " + desired_state);
         if (desired_state.equals("Toggle")) {                    // If Toggle...
             if (m_com_api.tuner_state.equals("Start"))
@@ -642,24 +601,19 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
 
         if (desired_state.equals("Start")) {                     // If Start...
             tuner_state_start_tmr = new Timer("tuner start", true);          // One shot Poll timer for file creates, SU commands, Bluedroid Init, then start tuner
-            if (tuner_state_start_tmr == null) {                              // If error...
-                com_uti.loge("Fatal error");
-                return (m_com_api.tuner_state);
-            }                                                                 // Else, Once after 0.01 seconds.
             tuner_state_start_tmr.schedule(new tuner_state_start_tmr_hndlr(), 10);
-            return (m_com_api.tuner_state);
+            return;
         } else if (desired_state.equals("Stop")) {                 // If Stop...
             m_svc_aap.audio_state_set("Stop");                               // Set Audio State  synchronously to Stop
             m_Radio.setTunerState(TunerState.Stop);
-            return (m_com_api.tuner_state);                                   // Return new tuner state
+            return;                                   // Return new tuner state
         }
 
         com_uti.loge("Unexpected desired_state: " + desired_state);
-        return (m_com_api.tuner_state);                                     // Return current tuner state
     }
 
     private void wifi_hack() {
-
+        boolean disable_wifi_hack = false;
         if (disable_wifi_hack)
             return;
 
@@ -821,7 +775,7 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
         //String bb1_full_filename = com_uti.res_file_create (m_context, R.raw.b1_bin,     "b1.bin",        false);             // Not executable
         //String bb2_full_filename = com_uti.res_file_create (m_context, R.raw.b2_bin,     "b2.bin",        false);             // Not executable
 
-        String add_full_filename = com_uti.res_file_create(m_context, R.raw.spirit_sh, "99-spirit.sh", true);
+        String add_full_filename = com_uti.res_file_create(m_context, R.raw.spirit_sh, "99-spirit.sh");
         // Check:
         int ret = 0;
 
@@ -906,45 +860,11 @@ public class RadioService extends Service implements svc_acb, IRadioListener {  
         return (0);
     }
 
-
-    // BT is? KitKat:   service call bluetooth_manager 4                                                TRANSACTION_isEnabled
-    // BT On  KitKat:   service call bluetooth_manager 6        Older:  service call bluetooth 3
-    // BT On- KitKat:   service call bluetooth_manager 7                                                TRANSACTION_enableNoAutoConnect
-    // BT Off KitKat:   service call bluetooth_manager 8        Older:  service call bluetooth 4
-
-    // BT is? Lolpop:   service call bluetooth_manager 7
-    // BT On  Lolpop:   service call bluetooth_manager 8
-    // BT On- Lolpop:   service call bluetooth_manager 9        // n.o. .p.e.r.m.i.s.s.i.o.n. .t.o. .e.n.a.b.l.e. .B.l.u.e.t.o.o.t.h. .q.u.i.e.t.l.y.
-    // BT Off Lolpop:   service call bluetooth_manager 10
-
-    // grep TRANSACTION_ /home/m/android/system/out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/bluetooth/IBluetoothManager.java
-    // static final int TRANSACTION_registerAdapter = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
-    // static final int TRANSACTION_registerQAdapter = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
-    // static final int TRANSACTION_unregisterAdapter = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
-    // static final int TRANSACTION_unregisterQAdapter = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
-    // static final int TRANSACTION_registerStateChangeCallback = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
-    // static final int TRANSACTION_unregisterStateChangeCallback = (android.os.IBinder.FIRST_CALL_TRANSACTION + 5);
-
-    //  7 static final int TRANSACTION_isEnabled = (android.os.IBinder.FIRST_CALL_TRANSACTION + 6);
-    //  8 static final int TRANSACTION_enable = (android.os.IBinder.FIRST_CALL_TRANSACTION + 7);
-    //  9 static final int TRANSACTION_enableNoAutoConnect = (android.os.IBinder.FIRST_CALL_TRANSACTION + 8);
-    // 10 static final int TRANSACTION_disable = (android.os.IBinder.FIRST_CALL_TRANSACTION + 9);               // n.o. .p.e.r.m.i.s.s.i.o.n. .t.o. .e.n.a.b.l.e. .B.l.u.e.t.o.o.t.h. .q.u.i.e.t.l.y.
-
-    // static final int TRANSACTION_getBluetoothGatt = (android.os.IBinder.FIRST_CALL_TRANSACTION + 10);
-    // static final int TRANSACTION_getQBluetooth = (android.os.IBinder.FIRST_CALL_TRANSACTION + 11);
-    // static final int TRANSACTION_getAddress = (android.os.IBinder.FIRST_CALL_TRANSACTION + 12);
-    // static final int TRANSACTION_getName = (android.os.IBinder.FIRST_CALL_TRANSACTION + 13);
-
-    // !!!! Need code to update shim when it changes !!!!   (Stable Jan 1, 2014 -> July 31/Nov 30, 2014)
-    // Should test new SpiritF shims with Spirit1
-
     // Tuner State callback called only by cb_tuner_key ("tuner_state") which is called for tuner_state only by:
     private class tuner_state_start_tmr_hndlr extends TimerTask {
 
         public void run() {
-            int ret = 0;
-
-            ret = files_init();                                              // /data/data/fm.a2d.sf/files/: busybox, ssd, s.wav, b1.bin, b2.bin
+            int ret = files_init();
             if (ret != 0)
                 com_uti.loge("files_init IGNORE Errors: " + ret);
 

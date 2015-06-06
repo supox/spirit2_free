@@ -3,13 +3,13 @@
 
 package fm.a2d.sf.service;
 
-public interface svc_tap {
+    interface svc_tap {
 
     // Now only 2 functions: tuner_get() and tuner_set(), to minimize the coupling between main SpiritF Service RadioService, and it's instantiated Tuner class svc_tnr.
     // Two functions makes new additions easy; just define new key, value pairs to pass.
     // For 1 function, we could move to Set/Get model seen in C tuner plugin code, eg: tuner_sg()
 
-  public abstract String tuner_get (String key);
+      String tuner_get(String key);
 /*
 t_api_state
 tuner_band
@@ -39,7 +39,7 @@ tuner_stereo
 tuner_thresh
 */
 
-  public abstract String tuner_set (String key, String val);
+      String tuner_set(String key, String val);
 /*
 t_api_state
 tuner_freq

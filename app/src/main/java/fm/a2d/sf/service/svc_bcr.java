@@ -59,23 +59,26 @@ public class svc_bcr extends BroadcastReceiver {                        // !! Op
       }
 
                                                                         // Get this at bootup
-      if (action.equals (android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-        com_uti.logd ("Wired Headset/Antenna Unplugged audio_state: " + gui_act.m_com_api.audio_state);               // Note duplication in svc_aud w/ m_hdst_plgd
+      switch (action) {
+        case android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY:
+          com_uti.logd("Wired Headset/Antenna Unplugged audio_state: " + gui_act.m_com_api.audio_state);               // Note duplication in svc_aud w/ m_hdst_plgd
 
-        if (gui_act.m_com_api.audio_state.equals ("Start"))             // !! Otherwise get pause timeout when pulling wired headset during phone call
-          gui_act.m_com_api.key_set ("audio_state", "Pause");
-      }
-      else if (action.equals (Intent.ACTION_MEDIA_BUTTON)) {
-        handle_key_event (context, (KeyEvent) intent.getExtras ().get (Intent.EXTRA_KEY_EVENT));
-      }
-      else if (action.equals ("android.media.MASTER_VOLUME_CHANGED_ACTION")) {
-        com_uti.loge ("Action android.media.MASTER_VOLUME_CHANGED_ACTION");
-      }
-      else if (action.equals ("android.media.VOLUME_CHANGED_ACTION")) {
-        com_uti.loge ("Action android.media.VOLUME_CHANGED_ACTION");
-      }
-      else {
-        com_uti.loge ("Unknown action  context: " + context + "  intent: " + intent + "  action: " + action);
+
+          if (gui_act.m_com_api.audio_state.equals("Start"))             // !! Otherwise get pause timeout when pulling wired headset during phone call
+            gui_act.m_com_api.key_set("audio_state", "Pause");
+          break;
+        case Intent.ACTION_MEDIA_BUTTON:
+          handle_key_event(context, (KeyEvent) intent.getExtras().get(Intent.EXTRA_KEY_EVENT));
+          break;
+        case "android.media.MASTER_VOLUME_CHANGED_ACTION":
+          com_uti.loge("Action android.media.MASTER_VOLUME_CHANGED_ACTION");
+          break;
+        case "android.media.VOLUME_CHANGED_ACTION":
+          com_uti.loge("Action android.media.VOLUME_CHANGED_ACTION");
+          break;
+        default:
+          com_uti.loge("Unknown action  context: " + context + "  intent: " + intent + "  action: " + action);
+          break;
       }
     }
     catch (Throwable e) {

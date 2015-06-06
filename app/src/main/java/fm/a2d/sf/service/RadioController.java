@@ -16,9 +16,9 @@ import fm.a2d.sf.domain.TunerState;
 
 public class RadioController implements IRadio {
 
-    private svc_tap tnr;
+    private final svc_tap tnr;
     private IRadioListener m_listener = null;
-    private svc_tcb m_svcListener = new svc_tcb() {
+    private final svc_tcb m_svcListener = new svc_tcb() {
         @Override
         public void cb_tuner_key(String key, String val) {
             if (m_listener == null)

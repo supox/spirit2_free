@@ -1,8 +1,8 @@
 package fm.a2d.sf.domain;
 
 public class Frequency {
-    static final int MHZ_FREQ_INC = 50;
-    double m_frequency;
+    private static final int MHZ_FREQ_INC = 50;
+    private final double m_frequency;
 
     public Frequency(String frequency) {
         this(Integer.valueOf(frequency));

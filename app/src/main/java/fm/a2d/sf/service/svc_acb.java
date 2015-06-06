@@ -3,7 +3,7 @@
 
 package fm.a2d.sf.service;
 
-public interface svc_acb {
+    interface svc_acb {
 
     // One callback function cb_audio_state()
     // To minimize the coupling between main SpiritF Service RadioService, and it's instantiated Audio class svc_aud, should reduce to one function as in svc_tap:
@@ -13,7 +13,7 @@ public interface svc_acb {
 
     // When audio state changes, call cb_audio_state() with new state value, same as com_api.audio_state:
 
-  public abstract void cb_audio_state (String new_state);
+      void cb_audio_state(String new_state);
 
 }
 

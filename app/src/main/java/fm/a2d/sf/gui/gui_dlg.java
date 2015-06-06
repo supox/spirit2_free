@@ -3,14 +3,7 @@
 
 package fm.a2d.sf.gui;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Bundle;
-
-public class gui_dlg { //extends Dialog implements DialogInterface.OnClickListener {
+    class gui_dlg { //extends Dialog implements DialogInterface.OnClickListener {
 }
 
 //  Had: public class MainGUI implements gui_gap, gui_dlg.gui_dlg_lstnr {

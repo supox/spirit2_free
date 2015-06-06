@@ -5,7 +5,6 @@ package fm.a2d.sf.service;
 
 
 import android.content.Context;
-import android.os.Handler;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,17 +18,14 @@ public class svc_tnr implements svc_tap {
     private static final String s2d_running_file = "/dev/s2d_running";
     private static final int min_freq = 65000;                           // !! Broadcom sometimes returns 64000, so suppress this as it writes frequency to settings
     private static int m_obinits = 1;
+    private final boolean need_polling = true;
     private svc_tcb m_svc_tcb = null;
     private com_api m_com_api = null;
-    private Handler m_hndlr = new Handler();                       // Instantiate handler object for events/Service callbacks
     private Context m_context = null;
-    private boolean need_polling = true;
     private boolean is_polling = false;
     private Timer poll_tmr = null;
-    private String last_poll_state = "-1";
     private int last_poll_freq = -1;
     private int last_poll_rssi = -1;
-    private String last_poll_pilot = "-1";
     private int last_poll_rds_pi = -1;
     private int last_poll_rds_pt = -1;
 
@@ -37,15 +33,7 @@ public class svc_tnr implements svc_tap {
     // Tuner API:
     private String last_poll_rds_ps = "-1";
     private String last_poll_rds_rt = "-1";
-    private int service_timeout_tuner_api_start = 12;           // Wait up to 12 seconds for tuner_api to start
-    private int service_timeout_tuner_start = 8;
-    private int service_timeout_general = 2;
-    private int service_timeout_tuner_stop = 4;
-    private int service_timeout_tuner_api_stop = 6;
-    private int new_rds_pi = -1;
-    private int new_rds_pt = -1;
     private String new_freq_str = "-1";
-    private int new_freq_int = -1;
     private boolean need_tx_rds_init = false;
 
     public svc_tnr(Context c, svc_tcb cb_tnr, com_api svc_com_api) {     // Context & Tuner API callback constructor
@@ -169,7 +157,7 @@ public class svc_tnr implements svc_tap {
         com_uti.logd("poll for s2d_running");
         int sleep_ms = 100;
         int max_ctr = tmo_ms / sleep_ms;
-        int ctr = 0;
+        int ctr;
         for (ctr = 0; ctr < max_ctr; ctr++) {
             if (running) {
                 if (com_uti.quiet_file_get(s2d_running_file))
@@ -189,222 +177,228 @@ public class svc_tnr implements svc_tap {
     }
 
     private String tuner_state_set(String desired_state) {               // Turn FM chip power on (Start) or off (Stop)
-        int res_len = 0;
-        int ret = 0;
-        String cmd_line = "";
+        int ret;
+        String cmd_line;
         com_uti.logd("desired_state: " + desired_state + "  m_com_api.tuner_state: " + m_com_api.tuner_state);
 
         // START:
-        if (desired_state.equals("Start")) {                     // START:
+        switch (desired_state) {
+            case "Start":                      // START:
 
-            if (m_com_api.tuner_state.equals("Stop")) {            // If tuner is stopped
-                m_com_api.tuner_state = "Starting";                             // Starting...
+                if (m_com_api.tuner_state.equals("Stop")) {            // If tuner is stopped
+                    m_com_api.tuner_state = "Starting";                             // Starting...
 
-                if (com_uti.file_get(s2d_running_file)) {                      // If "s2d daemon running" file already exists (if still running or was unexpectedly killed)
-                    com_uti.file_delete(s2d_running_file);
-                    com_uti.loge("HAVE s2d_running_file: " + s2d_running_file);
-                    if (com_uti.file_get(s2d_running_file))                      // If we can't delete the "s2d daemon running" file
-                        com_uti.loge("STILL HAVE after file_delete s2d_running_file: " + s2d_running_file);
-                } else {
-                    com_uti.logd("No s2d_running_file: " + s2d_running_file);
-                }
-
-                // Code for Xperia L issue; files under lib like lib/libs2d.so are permission 644 which works OK for libs but not exe/binaries
-                String daemon_lib = "/data/data/fm.a2d.sf/lib/libs2d.so";
-                String daemon_exe = "/data/data/fm.a2d.sf/files/s2d";
-
-                cmd_line = "chmod 755 " + daemon_lib + " ;";                   // Set permission 755 for libs2d.so
-                cmd_line += "chmod 755 /data/data/fm.a2d.sf/lib/* ;";           // Set permission 755 for all libs
-                cmd_line += "cp " + daemon_lib + " " + daemon_exe + " ;";       // Copy lib/lib2sd.so to files/s2d
-                cmd_line += "chmod 755 " + daemon_exe + " ;";                   // Set permission 755 for files/s2d
-                ret = com_uti.sys_run(cmd_line, false);
-                com_uti.logd("daemon setup ret: " + ret);
-
-
-                // Send Phase Update
-                m_com_api.service_update_send(null, "Testing Daemon", "" + service_timeout_general);
-
-                String test1 = "/data/data/fm.a2d.sf/files/test1";
-                String test2 = "/data/data/fm.a2d.sf/files/test2";
-
-                if (com_uti.file_get(test1))
-                    com_uti.file_delete(test1);
-                if (com_uti.file_get(test2))
-                    com_uti.file_delete(test2);
-
-                if (com_uti.file_get(test1))
-                    com_uti.loge("Can not delete " + test1);
-                if (com_uti.file_get(test2))
-                    com_uti.loge("Can not delete " + test2);
-
-                // Start libs2d.so daemon for test in test mode (Not daemon server mode)
-                cmd_line = daemon_lib + " test test 1>" + test1 + " 2>" + test2;
-                ret = com_uti.sys_run(cmd_line, false);                        // Start s2d daemon for testing; Don't need SU
-                com_uti.logd("daemon test ret: " + ret);
-
-                long size1 = 0;
-                if (com_uti.file_get(test1)) {
-                    size1 = com_uti.file_size_get(test1);
-                    com_uti.logd("Have file " + test1 + " size1: " + size1);
-                    if (size1 > 0) {
-                        byte[] ba = com_uti.file_read_16k(test1);
-                        String str = com_uti.ba_to_str(ba);
-                        com_uti.logd("str: \"" + str + "\"");
+                    if (com_uti.file_get(s2d_running_file)) {                      // If "s2d daemon running" file already exists (if still running or was unexpectedly killed)
+                        com_uti.file_delete(s2d_running_file);
+                        com_uti.loge("HAVE s2d_running_file: " + s2d_running_file);
+                        if (com_uti.file_get(s2d_running_file))                      // If we can't delete the "s2d daemon running" file
+                            com_uti.loge("STILL HAVE after file_delete s2d_running_file: " + s2d_running_file);
+                    } else {
+                        com_uti.logd("No s2d_running_file: " + s2d_running_file);
                     }
-                } else {
-                    com_uti.loge("No file " + test2);
-                }
 
-                long size2 = 0;
-                if (com_uti.file_get(test2)) {
-                    size2 = com_uti.file_size_get(test2);
-                    com_uti.logd("Have file " + test2 + " size2: " + size2);
-                    if (size2 > 0) {
-                        byte[] ba = com_uti.file_read_16k(test2);
-                        String str = com_uti.ba_to_str(ba);
-                        com_uti.logd("str: \"" + str + "\"");
-                    }
-                } else {
-                    com_uti.loge("No file " + test2);
-                }
+                    // Code for Xperia L issue; files under lib like lib/libs2d.so are permission 644 which works OK for libs but not exe/binaries
+                    String daemon_lib = "/data/data/fm.a2d.sf/lib/libs2d.so";
+                    String daemon_exe = "/data/data/fm.a2d.sf/files/s2d";
 
-                String daemon_bin = daemon_lib;
-                if (size1 <= 0 && com_uti.file_get(daemon_exe)) {
-                    daemon_bin = daemon_exe;
-                }
+                    cmd_line = "chmod 755 " + daemon_lib + " ;";                   // Set permission 755 for libs2d.so
+                    cmd_line += "chmod 755 /data/data/fm.a2d.sf/lib/* ;";           // Set permission 755 for all libs
+                    cmd_line += "cp " + daemon_lib + " " + daemon_exe + " ;";       // Copy lib/lib2sd.so to files/s2d
+                    cmd_line += "chmod 755 " + daemon_exe + " ;";                   // Set permission 755 for files/s2d
+                    ret = com_uti.sys_run(cmd_line, false);
+                    com_uti.logd("daemon setup ret: " + ret);
 
-                // Send Phase Update
-                m_com_api.service_update_send(null, "Starting Daemon", "" + service_timeout_daemon_start);
 
-                // Start libs2d.so daemon
-                cmd_line = daemon_bin + " server_mode_via_argv1 1>/dev/null 2>/dev/null";
-                ret = com_uti.sys_run(cmd_line, true);                         // Start s2d daemon
-                com_uti.logd("daemon kill/start ret: " + ret);
+                    // Send Phase Update
+                    int service_timeout_general = 2;
+                    m_com_api.service_update_send(null, "Testing Daemon", "" + service_timeout_general);
 
-                // Wait for daemon to start
-                boolean started = s2d_running_wait(true, service_timeout_daemon_start * 1000);
+                    String test1 = "/data/data/fm.a2d.sf/files/test1";
+                    String test2 = "/data/data/fm.a2d.sf/files/test2";
 
-                if (!started) {                                                // If s2d daemon NOT started... Send Error Update
-                    m_com_api.service_update_send(null, "ERROR Starting Daemon", "-1");
-                    m_com_api.tuner_state = "Stop";
-                } else if (started) {                                             // Else if s2d daemon started successfully...
+                    if (com_uti.file_get(test1))
+                        com_uti.file_delete(test1);
+                    if (com_uti.file_get(test2))
+                        com_uti.file_delete(test2);
 
-                    // Set Chassis Plugin Audio:
-                    m_com_api.service_update_send(null, "Setting Chassis Plugin Audio", "" + service_timeout_general);
-                    String new_chass_plug_aud = com_uti.daemon_set("chass_plug_aud", m_com_api.chass_plug_aud);
-                    com_uti.logd("m_com_api.chass_plug_aud: " + m_com_api.chass_plug_aud + "  new_chass_plug_aud: " + new_chass_plug_aud);
+                    if (com_uti.file_get(test1))
+                        com_uti.loge("Can not delete " + test1);
+                    if (com_uti.file_get(test2))
+                        com_uti.loge("Can not delete " + test2);
 
-                    // Set Chassis Plugin Tuner:
-                    m_com_api.service_update_send(null, "Setting Chassis Plugin Tuner", "" + service_timeout_general);
-                    String new_chass_plug_tnr = com_uti.daemon_set("chass_plug_tnr", m_com_api.chass_plug_tnr);
-                    com_uti.logd("m_com_api.chass_plug_tnr: " + m_com_api.chass_plug_tnr + "  new_chass_plug_tnr: " + new_chass_plug_tnr);
+                    // Start libs2d.so daemon for test in test mode (Not daemon server mode)
+                    cmd_line = daemon_lib + " test test 1>" + test1 + " 2>" + test2;
+                    ret = com_uti.sys_run(cmd_line, false);                        // Start s2d daemon for testing; Don't need SU
+                    com_uti.logd("daemon test ret: " + ret);
 
-                    // Set Tuner API Mode: UART, SHIM
-                    m_com_api.service_update_send(null, "Setting Tuner API Mode", "" + service_timeout_general);
-                    String new_tuner_api_mode = com_uti.daemon_set("tuner_api_mode", m_com_api.tuner_api_mode);
-                    com_uti.logd("m_com_api.tuner_api_mode: " + m_com_api.tuner_api_mode + "  new_tuner_api_mode: " + new_tuner_api_mode);
-
-                    // Start Tuner API
-                    m_com_api.service_update_send(null, "Starting Tuner API", "" + service_timeout_tuner_api_start);
-                    String new_tuner_api_state = com_uti.daemon_set("tuner_api_state", "Start");
-                    com_uti.logd("m_com_api.tuner_api_state: " + m_com_api.tuner_api_state + "  new_tuner_api_state: " + new_tuner_api_state);
-
-                    if (!new_tuner_api_state.equals("Start")) {       // If error starting Tuner API...
-                        // Send Error update
-                        m_com_api.service_update_send(null, "ERROR Starting Tuner API", "-1");
-                        m_com_api.tuner_api_state = "Stop";
-                        m_com_api.tuner_state = "Stop";
-                    } else {                                                        // Else if Tuner API started successfully...
-                        m_com_api.tuner_api_state = "Start";
-
-                        m_com_api.tuner_mode = "Receive";                           // Default mode is Receive
-                        if (com_uti.s2_tx_apk() && m_com_api.chass_plug_tnr.equals("QCV")) {  // If Transmit APK and tuner is QCV...
-                            m_com_api.tuner_mode = "Transmit";                        // Default mode is Transmit
+                    long size1 = 0;
+                    if (com_uti.file_get(test1)) {
+                        size1 = com_uti.file_size_get(test1);
+                        com_uti.logd("Have file " + test1 + " size1: " + size1);
+                        if (size1 > 0) {
+                            byte[] ba = com_uti.file_read_16k(test1);
+                            String str = com_uti.ba_to_str(ba);
+                            com_uti.logd("str: \"" + str + "\"");
                         }
-                        // Allow Settings to have the final say
-                        m_com_api.tuner_mode = com_uti.prefs_get(m_context, "tuner_mode", m_com_api.tuner_mode);
+                    } else {
+                        com_uti.loge("No file " + test2);
+                    }
 
-                        // Set Tuner Mode: Rx or Tx
-                        m_com_api.service_update_send(null, "Setting Tuner Mode", "" + service_timeout_general);
-                        String new_tuner_mode = com_uti.daemon_set("tuner_mode", m_com_api.tuner_mode);
-                        com_uti.logd("m_com_api.tuner_mode: " + m_com_api.tuner_mode + "  new_tuner_mode: " + new_tuner_mode);
+                    long size2 = 0;
+                    if (com_uti.file_get(test2)) {
+                        size2 = com_uti.file_size_get(test2);
+                        com_uti.logd("Have file " + test2 + " size2: " + size2);
+                        if (size2 > 0) {
+                            byte[] ba = com_uti.file_read_16k(test2);
+                            String str = com_uti.ba_to_str(ba);
+                            com_uti.logd("str: \"" + str + "\"");
+                        }
+                    } else {
+                        com_uti.loge("No file " + test2);
+                    }
 
+                    String daemon_bin = daemon_lib;
+                    if (size1 <= 0 && com_uti.file_get(daemon_exe)) {
+                        daemon_bin = daemon_exe;
+                    }
 
-                        // Start Tuner
-                        m_com_api.service_update_send(null, "Starting Tuner", "" + service_timeout_tuner_start);
-                        String new_tuner_state = com_uti.daemon_set("tuner_state", "Start");
-                        com_uti.logd("m_com_api.tuner_state: " + m_com_api.tuner_state + "  new_tuner_state: " + new_tuner_state);
+                    // Send Phase Update
+                    m_com_api.service_update_send(null, "Starting Daemon", "" + service_timeout_daemon_start);
 
+                    // Start libs2d.so daemon
+                    cmd_line = daemon_bin + " server_mode_via_argv1 1>/dev/null 2>/dev/null";
+                    ret = com_uti.sys_run(cmd_line, true);                         // Start s2d daemon
+                    com_uti.logd("daemon kill/start ret: " + ret);
 
-                        if (!new_tuner_state.equals("Start")) {         // If error starting tuner...
-                            // Send Error Update
-                            m_com_api.service_update_send(null, "ERROR Starting Tuner", "-1");
+                    // Wait for daemon to start
+                    boolean started = s2d_running_wait(true, service_timeout_daemon_start * 1000);
+
+                    if (!started) {                                                // If s2d daemon NOT started... Send Error Update
+                        m_com_api.service_update_send(null, "ERROR Starting Daemon", "-1");
+                        m_com_api.tuner_state = "Stop";
+                    } else if (started) {                                             // Else if s2d daemon started successfully...
+
+                        // Set Chassis Plugin Audio:
+                        m_com_api.service_update_send(null, "Setting Chassis Plugin Audio", "" + service_timeout_general);
+                        String new_chass_plug_aud = com_uti.daemon_set("chass_plug_aud", m_com_api.chass_plug_aud);
+                        com_uti.logd("m_com_api.chass_plug_aud: " + m_com_api.chass_plug_aud + "  new_chass_plug_aud: " + new_chass_plug_aud);
+
+                        // Set Chassis Plugin Tuner:
+                        m_com_api.service_update_send(null, "Setting Chassis Plugin Tuner", "" + service_timeout_general);
+                        String new_chass_plug_tnr = com_uti.daemon_set("chass_plug_tnr", m_com_api.chass_plug_tnr);
+                        com_uti.logd("m_com_api.chass_plug_tnr: " + m_com_api.chass_plug_tnr + "  new_chass_plug_tnr: " + new_chass_plug_tnr);
+
+                        // Set Tuner API Mode: UART, SHIM
+                        m_com_api.service_update_send(null, "Setting Tuner API Mode", "" + service_timeout_general);
+                        String new_tuner_api_mode = com_uti.daemon_set("tuner_api_mode", m_com_api.tuner_api_mode);
+                        com_uti.logd("m_com_api.tuner_api_mode: " + m_com_api.tuner_api_mode + "  new_tuner_api_mode: " + new_tuner_api_mode);
+
+                        // Start Tuner API
+                        int service_timeout_tuner_api_start = 12;
+                        m_com_api.service_update_send(null, "Starting Tuner API", "" + service_timeout_tuner_api_start);
+                        String new_tuner_api_state = com_uti.daemon_set("tuner_api_state", "Start");
+                        com_uti.logd("m_com_api.tuner_api_state: " + m_com_api.tuner_api_state + "  new_tuner_api_state: " + new_tuner_api_state);
+
+                        if (!new_tuner_api_state.equals("Start")) {       // If error starting Tuner API...
+                            // Send Error update
+                            m_com_api.service_update_send(null, "ERROR Starting Tuner API", "-1");
+                            m_com_api.tuner_api_state = "Stop";
                             m_com_api.tuner_state = "Stop";
-                        } else {                                                      // Else if Tuner started successfully...
-                            // Send Success Update
-                            m_com_api.service_update_send(null, "Success Starting Tuner", "0");
+                        } else {                                                        // Else if Tuner API started successfully...
+                            m_com_api.tuner_api_state = "Start";
 
-                            // Not fully working yet: ?
-                            // If Transmit APK and TX mode...
+                            m_com_api.tuner_mode = "Receive";                           // Default mode is Receive
+                            if (com_uti.s2_tx_apk() && m_com_api.chass_plug_tnr.equals("QCV")) {  // If Transmit APK and tuner is QCV...
+                                m_com_api.tuner_mode = "Transmit";                        // Default mode is Transmit
+                            }
+                            // Allow Settings to have the final say
+                            m_com_api.tuner_mode = com_uti.prefs_get(m_context, "tuner_mode", m_com_api.tuner_mode);
+
+                            // Set Tuner Mode: Rx or Tx
+                            m_com_api.service_update_send(null, "Setting Tuner Mode", "" + service_timeout_general);
+                            String new_tuner_mode = com_uti.daemon_set("tuner_mode", m_com_api.tuner_mode);
+                            com_uti.logd("m_com_api.tuner_mode: " + m_com_api.tuner_mode + "  new_tuner_mode: " + new_tuner_mode);
+
+
+                            // Start Tuner
+                            int service_timeout_tuner_start = 8;
+                            m_com_api.service_update_send(null, "Starting Tuner", "" + service_timeout_tuner_start);
+                            String new_tuner_state = com_uti.daemon_set("tuner_state", "Start");
+                            com_uti.logd("m_com_api.tuner_state: " + m_com_api.tuner_state + "  new_tuner_state: " + new_tuner_state);
+
+
+                            if (!new_tuner_state.equals("Start")) {         // If error starting tuner...
+                                // Send Error Update
+                                m_com_api.service_update_send(null, "ERROR Starting Tuner", "-1");
+                                m_com_api.tuner_state = "Stop";
+                            } else {                                                      // Else if Tuner started successfully...
+                                // Send Success Update
+                                m_com_api.service_update_send(null, "Success Starting Tuner", "0");
+
+                                // Not fully working yet: ?
+                                // If Transmit APK and TX mode...
 //com_uti.daemon_set ("tuner_rds_pi", "" + com_uti.prefs_get (m_context, "tuner_rds_pi", 34357));
 //com_uti.daemon_set ("tuner_rds_pt", "" + com_uti.prefs_get (m_context, "tuner_rds_pt", 9));
 //com_uti.daemon_set ("tuner_rds_ps",      com_uti.prefs_get (m_context, "tuner_rds_ps", "SpiritTX"));//"Spirit Transmit Program Service"));
 //com_uti.daemon_set ("tuner_rds_rt",      com_uti.prefs_get (m_context, "tuner_rds_rt", "Radiotext"));//"Spirit Transmit RadioText.......................................56789012345678901234567890123456789012345678901234567890123456701234567890abcdef"));
 // Need to delay this in order to work... How much ?
-                            need_tx_rds_init = com_uti.s2_tx_apk() && m_com_api.tuner_mode.equals("Transmit");
+                                need_tx_rds_init = com_uti.s2_tx_apk() && m_com_api.tuner_mode.equals("Transmit");
 
-                            int poll_ms = 1000;//800;//500;                          // Called every 1000/800/500 ms
-                            int wait_ms = 3000;//6000;                                // Wait 3/6 seconds before polling starts
-                            poll_start(wait_ms, poll_ms);                            // Start polling for changes & RDS
+                                int poll_ms = 1000;//800;//500;                          // Called every 1000/800/500 ms
+                                int wait_ms = 3000;//6000;                                // Wait 3/6 seconds before polling starts
+                                poll_start(wait_ms, poll_ms);                            // Start polling for changes & RDS
 
-                            m_com_api.tuner_state = "Start";                          // Started now
+                                m_com_api.tuner_state = "Start";                          // Started now
+                            }
                         }
                     }
                 }
-            }
-        }
+                break;
 
-        // STOP:
-        else if (desired_state.equals("Stop")) {                 // STOP:
-            if (m_com_api.tuner_state.equals("Start")) {           // If tuner is started...
-                poll_stop();                                                   // Stop polling for changes
-                m_com_api.tuner_state = "Stopping";
+            // STOP:
+            case "Stop":                  // STOP:
+                if (m_com_api.tuner_state.equals("Start")) {           // If tuner is started...
+                    poll_stop();                                                   // Stop polling for changes
+                    m_com_api.tuner_state = "Stopping";
 
-                m_com_api.service_update_send(null, "Stopping Tuner", "" + service_timeout_tuner_stop);    // Send Phase Update
+                    int service_timeout_tuner_stop = 4;
+                    m_com_api.service_update_send(null, "Stopping Tuner", "" + service_timeout_tuner_stop);    // Send Phase Update
 
-                String new_tuner_state = com_uti.daemon_set("tuner_state", "Stop");// Stop Tuner
-                com_uti.logd("new_tuner_state: " + new_tuner_state);
+                    String new_tuner_state = com_uti.daemon_set("tuner_state", "Stop");// Stop Tuner
+                    com_uti.logd("new_tuner_state: " + new_tuner_state);
 
-                if (new_tuner_state.equals("Stop")) {                // If Tuner stopped successfully...
-                    m_com_api.service_update_send(null, "Success Stopping Tuner", "0"); // Send Phase Update
-                    com_uti.logd("Success Stopping Tuner");
-                } else {
-                    m_com_api.service_update_send(null, "ERROR Stopping tuner", "-1");    // Send Error Update
-                    com_uti.loge("ERROR Stopping tuner new_tuner_state: " + new_tuner_state);
+                    if (new_tuner_state.equals("Stop")) {                // If Tuner stopped successfully...
+                        m_com_api.service_update_send(null, "Success Stopping Tuner", "0"); // Send Phase Update
+                        com_uti.logd("Success Stopping Tuner");
+                    } else {
+                        m_com_api.service_update_send(null, "ERROR Stopping tuner", "-1");    // Send Error Update
+                        com_uti.loge("ERROR Stopping tuner new_tuner_state: " + new_tuner_state);
+                    }
+
+                    // Stop Tuner API / Daemon
+                    int service_timeout_tuner_api_stop = 6;
+                    m_com_api.service_update_send(null, "Stopping Tuner API", "" + service_timeout_tuner_api_stop);  // Send Phase Update
+
+                    String new_tuner_api_state = com_uti.daemon_set("tuner_api_state", "Stop");
+                    com_uti.logd("m_com_api.tuner_api_state: " + m_com_api.tuner_api_state + "  new_tuner_api_state: " + new_tuner_api_state);
+
+                    boolean stopped = s2d_running_wait(false, 2000);               // Wait up to 2 seconds for daemon to stop
+
+                    if (stopped && new_tuner_api_state.equals("Stop")) { // If Tuner API stopped successfully...
+                        m_com_api.service_update_send(null, "Success Stopping Tuner API / Daemon", "0");  // Send Phase update
+                        com_uti.logd("Success Stopping Tuner API / Daemon");
+                    } else {                                                        // Else if error stopping Tuner API...
+                        m_com_api.service_update_send(null, "ERROR Stopping Tuner API / Daemon", "-1");  // Send Error update
+                        com_uti.loge("ERROR Stopping Tuner API / Daemon stopped: " + stopped + "  new_tuner_api_state: " + new_tuner_api_state);
+                    }
+                    m_com_api.tuner_api_state = "Stop";
+
+                    m_com_api.tuner_state = "Stop";
                 }
-
-                // Stop Tuner API / Daemon
-                m_com_api.service_update_send(null, "Stopping Tuner API", "" + service_timeout_tuner_api_stop);  // Send Phase Update
-
-                String new_tuner_api_state = com_uti.daemon_set("tuner_api_state", "Stop");
-                com_uti.logd("m_com_api.tuner_api_state: " + m_com_api.tuner_api_state + "  new_tuner_api_state: " + new_tuner_api_state);
-
-                boolean stopped = s2d_running_wait(false, 2000);               // Wait up to 2 seconds for daemon to stop
-
-                if (stopped && new_tuner_api_state.equals("Stop")) { // If Tuner API stopped successfully...
-                    m_com_api.service_update_send(null, "Success Stopping Tuner API / Daemon", "0");  // Send Phase update
-                    com_uti.logd("Success Stopping Tuner API / Daemon");
-                } else {                                                        // Else if error stopping Tuner API...
-                    m_com_api.service_update_send(null, "ERROR Stopping Tuner API / Daemon", "-1");  // Send Error update
-                    com_uti.loge("ERROR Stopping Tuner API / Daemon stopped: " + stopped + "  new_tuner_api_state: " + new_tuner_api_state);
-                }
-                m_com_api.tuner_api_state = "Stop";
-
-                m_com_api.tuner_state = "Stop";
-            }
-        } else {
-            com_uti.loge("Unexpected desired_state: " + desired_state + "  setting m_com_api.tuner_state: " + m_com_api.tuner_state);
-            return (m_com_api.tuner_state);
+                break;
+            default:
+                com_uti.loge("Unexpected desired_state: " + desired_state + "  setting m_com_api.tuner_state: " + m_com_api.tuner_state);
+                return (m_com_api.tuner_state);
         }
 
         if (desired_state.equals(m_com_api.tuner_state)) {
@@ -467,7 +461,7 @@ public class svc_tnr implements svc_tap {
                 String bulk = com_uti.daemon_get("tuner_bulk");
                 com_uti.logv("bulk: \"" + bulk + "\"");
 
-                String[] buar = {""};
+                String[] buar;
                 buar = bulk.split("mArK", 7);                                  // Split special tuner_bulk response
 
                 if (buar.length <= 1)                                           // Done if nothing
@@ -508,7 +502,7 @@ public class svc_tnr implements svc_tap {
             boolean need_bulk_displays_update = false;
 
             // Freq:
-            new_freq_int = com_uti.int_get(new_freq_str);
+            int new_freq_int = com_uti.int_get(new_freq_str);
             if (new_freq_int >= min_freq) {
                 if (last_poll_freq != new_freq_int) {
                     m_com_api.tuner_freq = new_freq_str;
@@ -541,7 +535,7 @@ public class svc_tnr implements svc_tap {
             }
 
             // RDS pi:
-            new_rds_pi = com_uti.int_get(m_com_api.tuner_rds_pi);
+            int new_rds_pi = com_uti.int_get(m_com_api.tuner_rds_pi);
             if (last_poll_rds_pi != new_rds_pi) {
                 last_poll_rds_pi = new_rds_pi;
                 m_com_api.tuner_rds_picl = com_uti.tnru_rds_picl_get(m_com_api.tuner_band, new_rds_pi);
@@ -549,7 +543,7 @@ public class svc_tnr implements svc_tap {
             }
 
             // RDS pt:
-            new_rds_pt = com_uti.int_get(m_com_api.tuner_rds_pt);
+            int new_rds_pt = com_uti.int_get(m_com_api.tuner_rds_pt);
             if (last_poll_rds_pt != new_rds_pt) {
                 last_poll_rds_pt = new_rds_pt;
                 m_com_api.tuner_rds_pt = m_com_api.tuner_rds_ptyn = com_uti.tnru_rds_ptype_get(m_com_api.tuner_band, new_rds_pt);

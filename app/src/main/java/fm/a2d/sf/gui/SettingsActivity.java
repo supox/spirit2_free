@@ -7,9 +7,9 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.ListPreference;
 import android.text.method.DigitsKeyListener;
 import android.widget.EditText;
 
@@ -18,18 +18,16 @@ import java.util.Locale;
 import fm.a2d.sf.R;
 import fm.a2d.sf.com.com_api;
 import fm.a2d.sf.com.com_uti;
-import fm.a2d.sf.gui.gui_act;
 
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+
+  private SharedPreferences m_sp = null;
+  private Context m_context = null;
 
   private void dig_sum_set (String key, boolean negative, boolean decimal) {
     digits_key_lstnr_set (key, negative, decimal);         // 0-9 PLUS: no negative, no decimal (positive integer)
     summary_set (key);
   }
-
-  private SharedPreferences m_sp = null;
-
-  private Context m_context = null;
 
   private com_api com_api_get (Context context) {
     if (gui_act.m_com_api == null) {
@@ -57,14 +55,13 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     com_uti.logd ("m_sp: " + m_sp);
   }
 
-  void digits_key_lstnr_set (String key, boolean sign, boolean decimal) {
+  private void digits_key_lstnr_set(String key, boolean sign, boolean decimal) {
     EditTextPreference etp = (EditTextPreference) findPreference (key);                             // Get Preference object for key
-    EditText et = (EditText) etp.getEditText ();
+    EditText et = etp.getEditText();
     et.setKeyListener (DigitsKeyListener.getInstance (sign, decimal));  // 0-9 PLUS sign, decimal
-    return;
   }
 
-  void summary_set (String key) {
+  private void summary_set(String key) {
 
     Preference pref = findPreference (key);                             // Get Preference object for key
 
@@ -101,8 +98,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     }
 
     else if (pref instanceof CheckBoxPreference) {
-      CheckBoxPreference cbp = (CheckBoxPreference) pref;
-      Boolean summ;
     }
 
   }
@@ -140,7 +135,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     else
       gui_act.m_com_api.key_set (key, val);
 
-    return;
   }
 
 }

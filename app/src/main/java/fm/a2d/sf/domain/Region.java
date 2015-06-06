@@ -22,27 +22,27 @@ public abstract class Region {
         return s_currentRegion;
     }
 
-    public static void setCurrentRegion(Region region) {
+    private static void setCurrentRegion(Region region) {
         s_currentRegion = region;
     }
 
-    public int getInc() {
+    int getInc() {
         return 100;
     }
 
-    public int getFreqLo() {
+    int getFreqLo() {
         return 87500;
     }
 
-    public int getFreqHigh() {
+    private int getFreqHigh() {
         return 10800;
     }
 
-    public boolean getFreqOdd() {
+    boolean getFreqOdd() {
         return false;
     }
 
-    public int roundFrequency(int freq) {
+    private int roundFrequency(int freq) {
         final int inc = getInc();
         if (getFreqOdd()) {
             freq += inc / 2;

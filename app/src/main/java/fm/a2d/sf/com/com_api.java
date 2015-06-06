@@ -14,7 +14,7 @@ import fm.a2d.sf.service.RadioService;
 public class com_api {
 
     public static final int chass_preset_max = 16;                       // Maximum presets, preset frequencies and names
-    public static Context m_context = null;
+    private static Context m_context = null;
     private static int m_obinits = 0;
 
 
@@ -27,14 +27,12 @@ public class com_api {
 
     // Chassis:
     private static int request_code = 777;
+    private final PresetsManager Presets;
     // Public stats:
     public int num_api_service_update = 0;
     public int num_key_set = 0;
     public String chass_phase = "Pre Init";                       // Phase of startup/shutdown for tuner, audio and related components    "Starting", "Stopping" and "ERROR" and "Success" messages
     public String chass_phtmo = "0";                              // Phase Timeout seconds if positive, Success if 0, Error code if negative
-    public PresetsManager Presets;
-
-
     // Audio: Sound Frequency Audio Service & Chip(s)
     public String chass_plug_aud = "UNK";                            // Audio Plugin
     public String chass_plug_tnr = "UNK";                            // Tuner Plugin
@@ -103,8 +101,7 @@ public class com_api {
         intent.setClass(context, RadioService.class);                           // !! Note possible different context and m_context !!
         intent.putExtra(key, val);
         request_code++;                                                    // Need a unique value to identify
-        PendingIntent pi = PendingIntent.getService(context, request_code, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        return (pi);
+        return (PendingIntent.getService(context, request_code, intent, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 
     ///*
@@ -176,13 +173,11 @@ public class com_api {
 
         Bundle extras = intent.getExtras();
 
-        String new_chass_phase = extras.getString("chass_phase", "");//"extra_detect");
         //if (! new_chass_phase.equals ("extra_detect"))
-        chass_phase = new_chass_phase;
+        chass_phase = extras.getString("chass_phase", "");
 
-        String new_chass_phtmo = extras.getString("chass_phtmo", "");//"extra_detect");
         //if (! new_chass_phtmo.equals ("extra_detect"))
-        chass_phtmo = new_chass_phtmo;
+        chass_phtmo = extras.getString("chass_phtmo", "");
 
         // TODO - presets
 

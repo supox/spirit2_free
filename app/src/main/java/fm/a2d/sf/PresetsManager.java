@@ -1,21 +1,22 @@
 
 package fm.a2d.sf;
 
-import android.content.SharedPreferences;
 import android.content.Context;
+import android.content.SharedPreferences;
 
-import java.io.IOException;
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.google.gson.Gson;
+
+import fm.a2d.sf.domain.Preset;
 
 public final class PresetsManager {
   private static final String SHARED_PREFS_FILE = "spirit2_presets_file";
   private static final String PRESETS = "PRESETS";
-
-  private List<Preset> m_presets = new ArrayList<Preset>();
-  private Context m_context;
+  private final Context m_context;
+  private List<Preset> m_presets = new ArrayList<>();
   private int m_currentIndex = 0;
   private int activePresetIndex;
 
@@ -29,25 +30,16 @@ public final class PresetsManager {
     }
   }
 
-  public int getActivePresetIndex() {
-    return m_currentIndex;
+  public static String serializePresets(List<Preset> presets) {
+    return new Gson().toJson(presets);
   }
 
-  public class Preset {
-    public String name;
-    public String freq;
-    public boolean isValid;
+  public static List<Preset> deserializePresets(String presets) {
+    return Arrays.asList(new Gson().fromJson(presets, Preset[].class));
+  }
 
-    public Preset() {
-      name = "";
-      freq = "";
-      isValid = false;
-    }
-    public Preset(String name, String freq) {
-      this.name = name;
-      this.freq = freq;
-      isValid = true;
-    }
+  public int getActivePresetIndex() {
+    return m_currentIndex;
   }
 
   public void savePreset(int index, Preset preset) {
@@ -55,7 +47,7 @@ public final class PresetsManager {
       m_presets.add(new Preset());
     }
     m_presets.set(index, preset);
-    
+
     //save the task list to preference
     SharedPreferences prefs = m_context.getSharedPreferences(SHARED_PREFS_FILE, Context.MODE_PRIVATE);
     SharedPreferences.Editor editor = prefs.edit();
@@ -77,13 +69,6 @@ public final class PresetsManager {
 
   public String serializePresets() {
     return new Gson().toJson(getPresets());
-  }
-  public static String serializePresets(List<Preset> presets) {
-    return new Gson().toJson(presets);
-  }
-
-  public static List<Preset> deserializePresets(String presets) {
-    return Arrays.asList(new Gson().fromJson(presets, Preset[].class));
   }
 
   public Preset setActivePreset(int index) {
